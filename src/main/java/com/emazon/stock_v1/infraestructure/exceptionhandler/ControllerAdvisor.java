@@ -1,5 +1,7 @@
-package com.emazon.stock_v1.infraestructure.exceptionHandler;
+package com.emazon.stock_v1.infraestructure.exceptionhandler;
 
+import com.emazon.stock_v1.domain.exception.InvalidPaginationParametersException;
+import com.emazon.stock_v1.infraestructure.exception.CategoriesNotFoundException;
 import com.emazon.stock_v1.infraestructure.exception.CategoryAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,5 +32,21 @@ public class ControllerAdvisor {
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage()));
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CategoriesNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCategoriesNotFoundException(
+            CategoriesNotFoundException categoriesNotFoundException
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.CATEGORIES_NOT_FOUND.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidPaginationParametersException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidPaginationParametersException(
+            InvalidPaginationParametersException invalidPaginationParametersException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_PAGINATION_PARAMETER.getMessage()));
     }
 }

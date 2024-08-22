@@ -1,6 +1,8 @@
 package com.emazon.stock_v1.infraestructure.out.jpa.adapter;
 
+import com.emazon.stock_v1.constants.GlobalConstants;
 import com.emazon.stock_v1.domain.model.Category;
+import com.emazon.stock_v1.infraestructure.exception.CategoriesNotFoundException;
 import com.emazon.stock_v1.infraestructure.exception.CategoryAlreadyExistsException;
 import com.emazon.stock_v1.infraestructure.out.jpa.entity.CategoryEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.CategoryEntityMapper;
@@ -11,7 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,5 +80,48 @@ class CategoryJpaAdapterTest {
         });
 
         verify(categoryRepository, times(1)).findByName("Electrónica");
+    }
+
+    @Test
+    void findAllTest(){
+        int page = 0, size = 10;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.SORT_BY).ascending());
+
+        List<CategoryEntity> categoryEntitiesList = new ArrayList<>();
+        categoryEntitiesList.add(categoryEntity);
+
+        Page<CategoryEntity> categoryEntities = new PageImpl<>(
+                categoryEntitiesList, pageable, categoryEntitiesList.size());
+
+        List<Category> categoryList = new ArrayList<>();
+        categoryList.add(category);
+
+        Page<Category> categories = new PageImpl<>(categoryList, pageable, categoryEntitiesList.size());
+
+        when(categoryRepository.findAll(any(Pageable.class))).thenReturn(categoryEntities);
+        when(categoryEntityMapper.categoryEntityToCategory(any(CategoryEntity.class))).thenReturn(category);
+
+        Page<Category> result = categoryJpaAdapter.findAll(pageable);
+
+        assertEquals(categories.getContent(), result.getContent());
+
+        verify(categoryRepository, times(1)).findAll(pageable);
+        verify(categoryEntityMapper, times(1))
+                .categoryEntityToCategory(any(CategoryEntity.class));
+    }
+
+    @Test
+    void save_shouldThrowCategoriesNotFoundException() {
+        int page = 0, size = 10;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.SORT_BY).ascending());
+        List<CategoryEntity> categoryEntitiesList = new ArrayList<>();
+        Page<CategoryEntity> categoryEntities = new PageImpl<>(
+                categoryEntitiesList, pageable, categoryEntitiesList.size());
+
+        when(categoryRepository.findAll(any(Pageable.class))).thenReturn(categoryEntities);
+
+        assertThrows(CategoriesNotFoundException.class, () -> {
+            categoryJpaAdapter.findAll(pageable);
+        });
     }
 }
