@@ -11,7 +11,13 @@ public enum ExceptionResponse {
             "The name is too long, it must have a maximum of 50 characters"),
     INVALID_LENGTH_DESCRIPTION_NAME(
             "The description is too long, it must have a maximum of 90 characters"),
-    EMPTY_CATEGORY_NAME("The name is empty"),;
+    EMPTY_CATEGORY_NAME("The name is empty"),
+    BRAND_ALREADY_EXISTS("There is already a brand with that name."),
+    EMPTY_BRAND_NAME("The brand name is empty"),
+    EMPTY_BRAND_DESCRIPTION("The brand description is empty"),
+    INVALID_LENGTH_BRAND_NAME("The name is empty or maybe too long, it must have a maximum of 50 characters"),
+    INVALID_LENGTH_BRAND_DESCRIPTION(
+            "The description is empty or maybe too long, it must have a maximum of 150 characters"),;
 
     private String message;
 
