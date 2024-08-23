@@ -3,7 +3,7 @@ package com.emazon.stock_v1.infraestructure.input.rest;
 import com.emazon.stock_v1.application.dto.CategoryRequest;
 import com.emazon.stock_v1.application.dto.CategoryResponse;
 import com.emazon.stock_v1.application.handler.ICategoryHandler;
-import com.emazon.stock_v1.constants.GlobalConstants;
+import com.emazon.stock_v1.helpers.GlobalConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

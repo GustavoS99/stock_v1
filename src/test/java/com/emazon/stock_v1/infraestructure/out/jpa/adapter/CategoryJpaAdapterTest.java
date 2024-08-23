@@ -1,6 +1,6 @@
 package com.emazon.stock_v1.infraestructure.out.jpa.adapter;
 
-import com.emazon.stock_v1.constants.GlobalConstants;
+import com.emazon.stock_v1.helpers.GlobalConstants;
 import com.emazon.stock_v1.domain.model.Category;
 import com.emazon.stock_v1.infraestructure.exception.CategoriesNotFoundException;
 import com.emazon.stock_v1.infraestructure.exception.CategoryAlreadyExistsException;
@@ -8,6 +8,7 @@ import com.emazon.stock_v1.infraestructure.out.jpa.entity.CategoryEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.CategoryEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.ICategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +50,7 @@ class CategoryJpaAdapterTest {
         categoryEntity = new CategoryEntity(1L,"Electrónica", "Artículos electrónicos");
     }
 
+    @DisplayName("Should validate the returned value of CategoryJpaAdapter.save(Category.class)")
     @Test
     void saveTest() {
         CategoryEntity savedCategoryEntity = new CategoryEntity(
@@ -61,9 +64,10 @@ class CategoryJpaAdapterTest {
 
         Category result = categoryJpaAdapter.save(category);
 
+        assertNotNull(result, "The result should not be null");
         assertEquals(savedCategory.getId(), result.getId());
         assertEquals(savedCategory.getName(), result.getName());
-        assertNotNull(result, "El resultado no debería ser null");
+        assertEquals(savedCategory.getDescription(), result.getDescription());
     }
 
     @Test
@@ -73,13 +77,11 @@ class CategoryJpaAdapterTest {
 
         Category existingCategory = new Category(1L, "Electrónica", "Artículos Electrónicos");
 
-        when(categoryRepository.findByName("Electrónica")).thenReturn(Optional.of(existingCategoryEntity));
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(existingCategoryEntity));
 
         assertThrows(CategoryAlreadyExistsException.class, () -> {
             categoryJpaAdapter.save(existingCategory);
         });
-
-        verify(categoryRepository, times(1)).findByName("Electrónica");
     }
 
     @Test

@@ -108,7 +108,7 @@ class SaveBrandUseCaseTest {
 
     @ParameterizedTest
     @MethodSource("providedSave_shouldThrowEmptyBrandDescriptionException_whenDescriptionIsEmpty")
-    @DisplayName("")
+    @DisplayName("Should throw EmptyBrandDescriptionException when name is empty")
     void save_shouldThrowEmptyBrandDescriptionException_whenDescriptionIsEmpty(Brand brand) {
         assertThrows(EmptyBrandDescriptionException.class, () -> saveBrandUseCase.save(brand));
     }
