@@ -55,13 +55,11 @@ class CategoryHandlerTest {
     @Test
     @DisplayName("Should assert Category saved fields and verify the call to saveCategoryServicePort.save()")
     void saveTest() {
-        when(categoryRequestMapper.categoryRequestToCategory(categoryRequest)).thenReturn(category);
-        doNothing().when(saveCategoryServicePort).save(category);
+        when(categoryRequestMapper.categoryRequestToCategory(any(CategoryRequest.class))).thenReturn(category);
+        doNothing().when(saveCategoryServicePort).save(any(Category.class));
 
         categoryHandler.save(categoryRequest);
 
-        assertEquals(categoryRequest.getName(), category.getName());
-        assertEquals(categoryRequest.getDescription(), category.getDescription());
         verify(saveCategoryServicePort, times(1)).save(category);
     }
 

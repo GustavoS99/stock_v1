@@ -1,6 +1,6 @@
 package com.emazon.stock_v1.domain.usecase;
 
-import com.emazon.stock_v1.constants.GlobalConstants;
+import com.emazon.stock_v1.helpers.GlobalConstants;
 import com.emazon.stock_v1.domain.api.IFindAllCategoriesServicePort;
 import com.emazon.stock_v1.domain.exception.InvalidPaginationParametersException;
 import com.emazon.stock_v1.domain.model.Category;

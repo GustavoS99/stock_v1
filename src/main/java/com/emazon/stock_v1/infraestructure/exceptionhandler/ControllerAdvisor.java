@@ -76,6 +76,14 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_CATEGORY_NAME.getMessage()));
     }
 
+    @ExceptionHandler(EmptyCategoryDescriptionException.class)
+    public ResponseEntity<Map<String, String>> handleEmptyCategoryDescriptionException(
+            EmptyCategoryDescriptionException emptyCategoryDescriptionException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_CATEGORY_DESCRIPTION.getMessage()));
+    }
+
     @ExceptionHandler(EmptyBrandNameException.class)
     public ResponseEntity<Map<String, String>> handleEmptyBrandNameException(
             EmptyBrandNameException emptyBrandNameException
