@@ -44,8 +44,8 @@ class CategoryJpaAdapterTest {
 
     @BeforeEach
     void setUp() {
-        category = new Category(null, "Electrónica", "Artículos electrónicos");
-        categoryEntity = new CategoryEntity(null,"Electrónica", "Artículos electrónicos");
+        category = new Category(1L, "Electrónica", "Artículos electrónicos");
+        categoryEntity = new CategoryEntity(1L,"Electrónica", "Artículos electrónicos");
     }
 
     @Test
