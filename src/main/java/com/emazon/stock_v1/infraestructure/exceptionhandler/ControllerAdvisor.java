@@ -1,6 +1,6 @@
 package com.emazon.stock_v1.infraestructure.exceptionhandler;
 
-import com.emazon.stock_v1.domain.exception.InvalidPaginationParametersException;
+import com.emazon.stock_v1.domain.exception.*;
 import com.emazon.stock_v1.infraestructure.exception.CategoriesNotFoundException;
 import com.emazon.stock_v1.infraestructure.exception.CategoryAlreadyExistsException;
 import org.springframework.http.HttpStatus;
@@ -48,5 +48,30 @@ public class ControllerAdvisor {
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_PAGINATION_PARAMETER.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidLengthCategoryNameException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidLengthCategoryNameException(
+            InvalidLengthCategoryNameException invalidLengthCategoryNameException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_LENGTH_CATEGORY_NAME.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidLengthCategoryDescriptionException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidLengthCategoryDescriptionException(
+            InvalidLengthCategoryDescriptionException invalidLengthCategoryDescriptionException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(
+                        MESSAGE, ExceptionResponse.INVALID_LENGTH_DESCRIPTION_NAME.getMessage()));
+    }
+
+    @ExceptionHandler(EmptyCategoryNameException.class)
+    public ResponseEntity<Map<String, String>> handleEmptyCategoryNameException(
+            EmptyCategoryNameException emptyCategoryNameException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_CATEGORY_NAME.getMessage()));
     }
 }

@@ -2,6 +2,7 @@ package com.emazon.stock_v1.infraestructure.input.rest;
 
 import com.emazon.stock_v1.application.dto.CategoryRequest;
 import com.emazon.stock_v1.application.handler.ICategoryHandler;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,14 +12,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,13 +29,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class CategoryRestControllerTest {
 
-    @MockBean
+    @SpyBean
     private ICategoryHandler categoryHandler;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
+    @DisplayName("Should verify the expected 201 status")
     void saveCategoryTest() throws Exception {
         String categoryJson = """
                 {
@@ -59,34 +61,32 @@ class CategoryRestControllerTest {
                 "name": "",
                 "description":"description"
                 }
-                """,
                 """
-                {
-                "name": "name",
-                "description":""
-                }
-                """,
-                        """
+                ),
+                Arguments.of("""
                 {
                 "name": "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
                 "description":"description"
                 }
-                """,
-                        """
+                """),
+                Arguments.of("""
                 {
                 "name": "Name",
                 "description":
                 "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
                 }
-                """,
-                "{}"
-                )
+                """),
+                Arguments.of("{}")
         );
     }
 
+
+    @DisplayName("Should verify the expected 400 status")
     @ParameterizedTest
     @MethodSource("providedCategoryRequestsForSaveCategoryException")
     void saveCategory_shouldReturnBadRequest_whenValidationFails(String categoryJson) throws Exception{
+
+        doCallRealMethod().when(categoryHandler).save(any(CategoryRequest.class));
 
         mockMvc.perform(post("/categories/")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -94,6 +94,7 @@ class CategoryRestControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @DisplayName("Should verify the expected 200 status")
     @Test
     void findAllTest() throws Exception{
 

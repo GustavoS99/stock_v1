@@ -1,8 +1,10 @@
 package com.emazon.stock_v1.infraestructure.configuration;
 
-import com.emazon.stock_v1.domain.api.ICategoryServicePort;
+import com.emazon.stock_v1.domain.api.IFindAllCategoriesServicePort;
+import com.emazon.stock_v1.domain.api.ISaveCategoryServicePort;
 import com.emazon.stock_v1.domain.spi.ICategoryPersistencePort;
-import com.emazon.stock_v1.domain.usecase.CategoryUseCase;
+import com.emazon.stock_v1.domain.usecase.FindAllCategoriesUseCase;
+import com.emazon.stock_v1.domain.usecase.SaveCategoryUseCase;
 import com.emazon.stock_v1.infraestructure.out.jpa.adapter.CategoryJpaAdapter;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.CategoryEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.ICategoryRepository;
@@ -23,7 +25,12 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public ICategoryServicePort categoryServicePort() {
-        return new CategoryUseCase(categoryPersistencePort());
+    public ISaveCategoryServicePort saveCategoryServicePort() {
+        return new SaveCategoryUseCase(categoryPersistencePort());
+    }
+
+    @Bean
+    public IFindAllCategoriesServicePort findAllCategoriesServicePort() {
+        return new FindAllCategoriesUseCase(categoryPersistencePort());
     }
 }
