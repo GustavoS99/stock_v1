@@ -2,24 +2,24 @@ package com.emazon.stock_v1.domain.model;
 
 public class Category {
 
-    private Long id;
+    private long id;
     private String name;
     private String description;
 
     public Category() {
     }
 
-    public Category(Long id, String name, String description) {
+    public Category(long id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

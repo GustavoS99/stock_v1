@@ -1,7 +1,7 @@
 package com.emazon.stock_v1.domain.usecase;
 
-import com.emazon.stock_v1.domain.api.ICategoryServicePort;
 import com.emazon.stock_v1.constants.GlobalConstants;
+import com.emazon.stock_v1.domain.api.IFindAllCategoriesServicePort;
 import com.emazon.stock_v1.domain.exception.InvalidPaginationParametersException;
 import com.emazon.stock_v1.domain.model.Category;
 import com.emazon.stock_v1.domain.spi.ICategoryPersistencePort;
@@ -10,17 +10,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class CategoryUseCase implements ICategoryServicePort {
-
+public class FindAllCategoriesUseCase implements IFindAllCategoriesServicePort {
     private final ICategoryPersistencePort categoryPersistencePort;
 
-    public CategoryUseCase(ICategoryPersistencePort categoryPersistencePort) {
+    public FindAllCategoriesUseCase(ICategoryPersistencePort categoryPersistencePort) {
         this.categoryPersistencePort = categoryPersistencePort;
-    }
-
-    @Override
-    public void save(Category category) {
-        categoryPersistencePort.save(category);
     }
 
     @Override
