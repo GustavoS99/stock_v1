@@ -1,5 +1,6 @@
 package com.emazon.stock_v1.domain.usecase;
 
+import com.emazon.stock_v1.domain.exception.EmptyCategoryDescriptionException;
 import com.emazon.stock_v1.domain.exception.EmptyCategoryNameException;
 import com.emazon.stock_v1.domain.exception.InvalidLengthCategoryDescriptionException;
 import com.emazon.stock_v1.domain.exception.InvalidLengthCategoryNameException;
@@ -30,18 +31,11 @@ class SaveCategoryUseCaseTest {
     @InjectMocks
     private SaveCategoryUseCase saveCategoryUseCase;
 
-    private static Stream<Arguments> providedSaveTest(){
-        return Stream.of(
-                Arguments.of(new Category(1L, "Electrónica", "Artículos Electrónicos")),
-                Arguments.of(new Category(1L, "Electrónica", "")),
-                Arguments.of(new Category(1L, "Electrónica", null))
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("providedSaveTest")
+    @Test
     @DisplayName("Should call categoryPersistencePort.save(category) one time")
-    void saveTest(Category category) {
+    void saveTest() {
+
+        Category category = new Category(1L, "Electrónica", "Artículos Electrónicos");
 
         when(categoryPersistencePort.save(any(Category.class))).thenReturn(category);
 
@@ -50,7 +44,21 @@ class SaveCategoryUseCaseTest {
         verify(categoryPersistencePort, times(1)).save(category);
     }
 
-    @Test
+    private static Stream<Arguments> providedSave_shouldThrowInvalidLengthCategoryNameException_whenNameIsLong(){
+        return Stream.of(
+                Arguments.of(new Category(
+                        1L,
+                        "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
+                        "Artículos Electrónicos")),
+                Arguments.of(new Category(
+                        1L,
+                        " ",
+                        "Artículos Electrónicos"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("providedSave_shouldThrowInvalidLengthCategoryNameException_whenNameIsLong")
     @DisplayName("Should throw InvalidLengthCategoryNameException when name is long")
     void save_shouldThrowInvalidLengthCategoryNameException_whenNameIsLong() {
         Category category = new Category(
@@ -61,6 +69,27 @@ class SaveCategoryUseCaseTest {
         assertThrows(InvalidLengthCategoryNameException.class, () -> {
             saveCategoryUseCase.save(category);
         });
+    }
+
+    private static Stream<Arguments> providedSave_shouldThrowInvalidLengthCategoryDescriptionException_whenDescriptionIsLong(){
+        return Stream.of(
+                Arguments.of(new Category(
+                        1L,
+                        "Electrónica",
+                        "DescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescription" +
+                                "DescriptionDescription")),
+                Arguments.of(new Category(
+                        1L,
+                        "Electrónica",
+                        " "))
+        );
+    }
+
+    @DisplayName("should throw InvalidLengthCategoryDescriptionException when description is long")
+    @ParameterizedTest
+    @MethodSource("providedSave_shouldThrowInvalidLengthCategoryDescriptionException_whenDescriptionIsLong")
+    void save_shouldThrowInvalidLengthCategoryDescriptionException_whenDescriptionIsLong(Category category) {
+        assertThrows(InvalidLengthCategoryDescriptionException.class, () -> saveCategoryUseCase.save(category));
     }
 
     private static Stream<Arguments> providedSave_shouldThrowEmptyCategoryNameException_whenNameIsEmpty(){
@@ -80,16 +109,17 @@ class SaveCategoryUseCaseTest {
         });
     }
 
-    @Test
-    @DisplayName("should throw InvalidLengthCategoryDescriptionException when description is long")
-    void save_shouldThrowInvalidLengthCategoryDescriptionException_whenDescriptionIsLong() {
-        Category category = new Category(
-                1L,
-                "name",
-                "descriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondes");
+    private static Stream<Arguments> providedSave_shouldThrowEmptyCategoryDescriptionException_whenDescriptionIsEmpty(){
+        return Stream.of(
+                Arguments.of(new Category(1L, "Category", "")),
+                Arguments.of(new Category(1L, "Category", null))
+        );
+    }
 
-        assertThrows(InvalidLengthCategoryDescriptionException.class, () -> {
-            saveCategoryUseCase.save(category);
-        });
+    @ParameterizedTest
+    @MethodSource("providedSave_shouldThrowEmptyCategoryDescriptionException_whenDescriptionIsEmpty")
+    @DisplayName("Should throw EmptyCategoryDescriptionException when name is empty")
+    void save_shouldThrowEmptyCategoryDescriptionException_whenDescriptionIsEmpty(Category category) {
+        assertThrows(EmptyCategoryDescriptionException.class, () -> saveCategoryUseCase.save(category));
     }
 }
