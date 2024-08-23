@@ -1,6 +1,6 @@
 package com.emazon.stock_v1.domain.usecase;
 
-import com.emazon.stock_v1.constants.GlobalConstants;
+import com.emazon.stock_v1.helpers.GlobalConstants;
 import com.emazon.stock_v1.domain.api.ISaveCategoryServicePort;
 import com.emazon.stock_v1.domain.exception.EmptyCategoryNameException;
 import com.emazon.stock_v1.domain.exception.InvalidLengthCategoryDescriptionException;

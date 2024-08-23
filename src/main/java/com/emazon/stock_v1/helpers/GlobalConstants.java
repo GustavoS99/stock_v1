@@ -1,4 +1,4 @@
-package com.emazon.stock_v1.constants;
+package com.emazon.stock_v1.helpers;
 
 public class GlobalConstants {
 
@@ -11,6 +11,8 @@ public class GlobalConstants {
     public static final String ASCENDING_SORT = "asc";
     public static final int LENGTH_CATEGORY_NAME = 50;
     public static final int LENGTH_CATEGORY_DESCRIPTION = 90;
+    public static final int LENGTH_BRAND_DESCRIPTION = 150;
+    public static final int LENGTH_BRAND_NAME = 50;
 
     private GlobalConstants() {
         throw new IllegalStateException("Utility class");
