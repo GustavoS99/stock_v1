@@ -2,6 +2,7 @@ package com.emazon.stock_v1.infraestructure.input.rest;
 
 import com.emazon.stock_v1.application.dto.BrandRequest;
 import com.emazon.stock_v1.application.handler.IBrandHandler;
+import com.emazon.stock_v1.helpers.GlobalConstants;
 import com.emazon.stock_v1.infraestructure.out.jpa.entity.BrandEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.IBrandRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -16,14 +17,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -150,5 +155,38 @@ class BrandRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(brandJson))
                 .andExpect(status().isConflict());
+    }
+
+    @DisplayName("Should verify the expected 200 status")
+    @Test
+    void findAllTest() throws Exception {
+        int page = 0, size = 10;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.BRAND_SORT_BY).ascending());
+
+        List<BrandEntity> brandEntityList = new ArrayList<>();
+        brandEntityList.add(
+                new BrandEntity(1L, "Asus", "Hardware de informática y electrónica de consumo."));
+
+        Page<BrandEntity> brandEntities = new PageImpl<>(brandEntityList, pageable, brandEntityList.size());
+
+        when(brandRepository.findAll(any(Pageable.class))).thenReturn(brandEntities);
+
+        mockMvc.perform(get("/brands/"))
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("Should verify the expected 400 status when brands not found")
+    @Test
+    void findAll_shouldThrowBrandsNotFoundException() throws Exception {
+
+        int page = 0, size = 10;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.BRAND_SORT_BY).ascending());
+        List<BrandEntity> brandEntityList = new ArrayList<>();
+        Page<BrandEntity> brandEntities = new PageImpl<>(brandEntityList, pageable, brandEntityList.size());
+
+        when(brandRepository.findAll(any(Pageable.class))).thenReturn(brandEntities);
+
+        mockMvc.perform(get("/brands/"))
+                .andExpect(status().isNotFound());
     }
 }

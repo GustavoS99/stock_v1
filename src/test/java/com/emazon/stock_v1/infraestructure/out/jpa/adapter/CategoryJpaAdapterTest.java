@@ -87,7 +87,7 @@ class CategoryJpaAdapterTest {
     @Test
     void findAllTest(){
         int page = 0, size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.SORT_BY).ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.CATEGORY_SORT_BY).ascending());
 
         List<CategoryEntity> categoryEntitiesList = new ArrayList<>();
         categoryEntitiesList.add(categoryEntity);
@@ -113,9 +113,9 @@ class CategoryJpaAdapterTest {
     }
 
     @Test
-    void save_shouldThrowCategoriesNotFoundException() {
+    void findAll_shouldThrowCategoriesNotFoundException() {
         int page = 0, size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.SORT_BY).ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.CATEGORY_SORT_BY).ascending());
         List<CategoryEntity> categoryEntitiesList = new ArrayList<>();
         Page<CategoryEntity> categoryEntities = new PageImpl<>(
                 categoryEntitiesList, pageable, categoryEntitiesList.size());

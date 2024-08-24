@@ -18,7 +18,8 @@ public enum ExceptionResponse {
     EMPTY_BRAND_DESCRIPTION("The brand description is empty"),
     INVALID_LENGTH_BRAND_NAME("The name is empty or maybe too long, it must have a maximum of 50 characters"),
     INVALID_LENGTH_BRAND_DESCRIPTION(
-            "The description is empty or maybe too long, it must have a maximum of 150 characters"),;
+            "The description is empty or maybe too long, it must have a maximum of 150 characters"),
+    BRANDS_NOT_FOUND("No brands found");
 
     private String message;
 

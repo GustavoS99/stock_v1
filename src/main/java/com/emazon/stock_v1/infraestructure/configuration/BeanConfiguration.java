@@ -1,10 +1,12 @@
 package com.emazon.stock_v1.infraestructure.configuration;
 
+import com.emazon.stock_v1.domain.api.IFindAllBrandsServicePort;
 import com.emazon.stock_v1.domain.api.IFindAllCategoriesServicePort;
 import com.emazon.stock_v1.domain.api.ISaveBrandServicePort;
 import com.emazon.stock_v1.domain.api.ISaveCategoryServicePort;
 import com.emazon.stock_v1.domain.spi.IBrandPersistencePort;
 import com.emazon.stock_v1.domain.spi.ICategoryPersistencePort;
+import com.emazon.stock_v1.domain.usecase.FindAllBrandsUseCase;
 import com.emazon.stock_v1.domain.usecase.FindAllCategoriesUseCase;
 import com.emazon.stock_v1.domain.usecase.SaveBrandUseCase;
 import com.emazon.stock_v1.domain.usecase.SaveCategoryUseCase;
@@ -50,5 +52,10 @@ public class BeanConfiguration {
     @Bean
     public ISaveBrandServicePort saveBrandServicePort() {
         return new SaveBrandUseCase(brandPersistencePort());
+    }
+
+    @Bean
+    public IFindAllBrandsServicePort findAllBrandsServicePort() {
+        return new FindAllBrandsUseCase(brandPersistencePort());
     }
 }
