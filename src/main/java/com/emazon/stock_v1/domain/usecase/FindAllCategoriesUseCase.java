@@ -22,9 +22,9 @@ public class FindAllCategoriesUseCase implements IFindAllCategoriesServicePort {
         if(page < GlobalConstants.START_PAGE || size <= GlobalConstants.START_PAGE_SIZE) {
             throw new InvalidPaginationParametersException();
         }
-        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.SORT_BY).ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.CATEGORY_SORT_BY).ascending());
         if(sortDirection.equalsIgnoreCase(GlobalConstants.DESCENDING_SORT))
-            pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.SORT_BY).descending());
+            pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.CATEGORY_SORT_BY).descending());
         return categoryPersistencePort.findAll(pageable);
     }
 }

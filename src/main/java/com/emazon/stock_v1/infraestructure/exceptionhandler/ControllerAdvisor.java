@@ -2,6 +2,7 @@ package com.emazon.stock_v1.infraestructure.exceptionhandler;
 
 import com.emazon.stock_v1.domain.exception.*;
 import com.emazon.stock_v1.infraestructure.exception.BrandAlreadyExistsException;
+import com.emazon.stock_v1.infraestructure.exception.BrandsNotFoundException;
 import com.emazon.stock_v1.infraestructure.exception.CategoriesNotFoundException;
 import com.emazon.stock_v1.infraestructure.exception.CategoryAlreadyExistsException;
 import org.springframework.http.HttpStatus;
@@ -124,4 +125,13 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.BRAND_ALREADY_EXISTS.getMessage()));
     }
+
+    @ExceptionHandler(BrandsNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleBrandsNotFoundException(
+            BrandsNotFoundException brandsNotFoundException
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.BRANDS_NOT_FOUND.getMessage()));
+    }
+
 }
