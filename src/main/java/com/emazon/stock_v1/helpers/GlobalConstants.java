@@ -14,6 +14,10 @@ public class GlobalConstants {
     public static final int LENGTH_BRAND_DESCRIPTION = 150;
     public static final int LENGTH_BRAND_NAME = 50;
     public static final String BRAND_SORT_BY = "name";
+    public static final int LENGTH_ITEM_NAME = 50;
+    public static final int LENGTH_ITEM_DESCRIPTION = 200;
+    public static final int ITEM_MIN_CATEGORIES = 1;
+    public static final int ITEM_MAX_CATEGORIES = 3;
 
     private GlobalConstants() {
         throw new IllegalStateException("Utility class");
