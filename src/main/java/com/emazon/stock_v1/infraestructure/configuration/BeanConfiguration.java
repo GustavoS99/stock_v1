@@ -1,21 +1,19 @@
 package com.emazon.stock_v1.infraestructure.configuration;
 
-import com.emazon.stock_v1.domain.api.IFindAllBrandsServicePort;
-import com.emazon.stock_v1.domain.api.IFindAllCategoriesServicePort;
-import com.emazon.stock_v1.domain.api.ISaveBrandServicePort;
-import com.emazon.stock_v1.domain.api.ISaveCategoryServicePort;
+import com.emazon.stock_v1.domain.api.*;
 import com.emazon.stock_v1.domain.spi.IBrandPersistencePort;
 import com.emazon.stock_v1.domain.spi.ICategoryPersistencePort;
-import com.emazon.stock_v1.domain.usecase.FindAllBrandsUseCase;
-import com.emazon.stock_v1.domain.usecase.FindAllCategoriesUseCase;
-import com.emazon.stock_v1.domain.usecase.SaveBrandUseCase;
-import com.emazon.stock_v1.domain.usecase.SaveCategoryUseCase;
+import com.emazon.stock_v1.domain.spi.IItemPersistencePort;
+import com.emazon.stock_v1.domain.usecase.*;
 import com.emazon.stock_v1.infraestructure.out.jpa.adapter.BrandJpaAdapter;
 import com.emazon.stock_v1.infraestructure.out.jpa.adapter.CategoryJpaAdapter;
+import com.emazon.stock_v1.infraestructure.out.jpa.adapter.ItemJpaAdapter;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.BrandEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.CategoryEntityMapper;
+import com.emazon.stock_v1.infraestructure.out.jpa.mapper.ItemEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.IBrandRepository;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.ICategoryRepository;
+import com.emazon.stock_v1.infraestructure.out.jpa.repository.IItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +26,8 @@ public class BeanConfiguration {
     private final CategoryEntityMapper categoryEntityMapper;
     private final IBrandRepository brandRepository;
     private final BrandEntityMapper brandEntityMapper;
+    private final IItemRepository itemRepository;
+    private final ItemEntityMapper itemEntityMapper;
 
     @Bean
     public ICategoryPersistencePort categoryPersistencePort() {
@@ -57,5 +57,17 @@ public class BeanConfiguration {
     @Bean
     public IFindAllBrandsServicePort findAllBrandsServicePort() {
         return new FindAllBrandsUseCase(brandPersistencePort());
+    }
+
+    @Bean
+    public IItemPersistencePort itemPersistencePort(){
+        return new ItemJpaAdapter(
+                itemRepository, brandRepository, categoryRepository,
+                itemEntityMapper, brandEntityMapper, categoryEntityMapper);
+    }
+
+    @Bean
+    public ISaveItemServicePort saveItemServicePort() {
+        return new SaveItemUseCase(itemPersistencePort());
     }
 }

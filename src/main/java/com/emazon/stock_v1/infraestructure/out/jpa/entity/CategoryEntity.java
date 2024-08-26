@@ -1,16 +1,13 @@
 package com.emazon.stock_v1.infraestructure.out.jpa.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
+import java.util.HashSet;
+import java.util.Set;
+
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -26,4 +23,13 @@ public class CategoryEntity {
     @Column(length = 90,
             nullable = false)
     private String description;
+
+    @ManyToMany(mappedBy = "categories")
+    private Set<ItemEntity> items = new HashSet<>();
+
+    public CategoryEntity(long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 }

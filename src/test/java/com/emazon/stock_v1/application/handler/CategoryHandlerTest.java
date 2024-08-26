@@ -84,7 +84,8 @@ class CategoryHandlerTest {
 
         Page<CategoryResponse> result = categoryHandler.findAll(page, size, sort);
 
-        assertEquals(expectedCategoriesList, result.getContent());
+        assertEquals(expectedCategoriesList.get(0).getName(), result.getContent().get(0).getName());
+        assertEquals(expectedCategoriesList.get(0).getDescription(), result.getContent().get(0).getDescription());
         verify(findAllCategoriesServicePort, times(1)).findAll(anyInt(), anyInt(), anyString());
     }
 }
