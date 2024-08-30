@@ -4,17 +4,16 @@ import com.emazon.stock_v1.application.dto.BrandRequest;
 import com.emazon.stock_v1.application.dto.BrandResponse;
 import com.emazon.stock_v1.application.mapper.BrandRequestMapper;
 import com.emazon.stock_v1.application.mapper.BrandResponseMapper;
-import com.emazon.stock_v1.domain.api.IFindAllBrandsServicePort;
-import com.emazon.stock_v1.domain.api.ISaveBrandServicePort;
+import com.emazon.stock_v1.domain.api.IBrandServicePort;
 import com.emazon.stock_v1.domain.model.Brand;
-import org.junit.jupiter.api.DisplayName;
+import com.emazon.stock_v1.domain.model.PaginatedResult;
+import com.emazon.stock_v1.domain.model.PaginationRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +26,7 @@ import static org.mockito.Mockito.*;
 class BrandHandlerTest {
 
     @Mock
-    private ISaveBrandServicePort saveBrandServicePort;
-
-    @Mock
-    private IFindAllBrandsServicePort findAllBrandsServicePort;
+    private IBrandServicePort brandServicePort;
 
     @Mock
     private BrandRequestMapper brandRequestMapper;
@@ -41,46 +37,56 @@ class BrandHandlerTest {
     @InjectMocks
     private BrandHandler brandHandler;
 
-    @DisplayName("Should assert Brand saved fields and verify the call to saveBrandServicePort.save()")
+    private Brand brand;
+    private BrandRequest brandRequest;
+    private BrandResponse brandResponse;
+
+    @BeforeEach
+    void setUp() {
+
+        brand = new Brand(1L, "Asus", "Hardware de informática y electrónica de consumo.");
+
+        brandRequest = new BrandRequest(brand.getName(), brand.getDescription());
+
+        brandResponse = new BrandResponse(brand.getName(), brand.getDescription());
+    }
+
     @Test
-    void saveTest() {
-        BrandRequest brandRequest = new BrandRequest(
-                "Asus", "Hardware de informática y electrónica de consumo.");
-        Brand brand = new Brand(1L, "Asus", "Hardware de informática y electrónica de consumo.");
+    void when_saveBrand_expect_callToServicePort() {
+
         when(brandRequestMapper.brandRequestToBrand(any(BrandRequest.class))).thenReturn(brand);
-        doNothing().when(saveBrandServicePort).save(any(Brand.class));
+
+        doNothing().when(brandServicePort).save(any(Brand.class));
 
         brandHandler.save(brandRequest);
 
-        verify(saveBrandServicePort, times(1)).save(brand);
+        verify(brandServicePort, times(1)).save(brand);
     }
 
-    @DisplayName(
-            "Should assert the result list of brands and verify the call to IFindAllBrandsServicePort.findAll()"
-    )
     @Test
-    void findAllTest() {
+    void when_findAllBrands_expect_callToServicePort() {
         int page = 0, size = 10;
         String sort = "desc";
 
         List<Brand> brandList = new ArrayList<>();
-        brandList.add(new Brand(1L, "Asus", "Hardware de informática y electrónica de consumo."));
+        brandList.add(brand);
 
-        Page<Brand> brands = new PageImpl<>(brandList);
-
-        BrandResponse brandResponse = new BrandResponse(
-                "Asus", "Hardware de informática y electrónica de consumo.");
+        PaginatedResult<Brand> brands = new PaginatedResult<>(brandList, page, size, brandList.size());
 
         List<BrandResponse> expectedBrandList = new ArrayList<>();
         expectedBrandList.add(brandResponse);
 
-        when(findAllBrandsServicePort.findAll(anyInt(), anyInt(), anyString())).thenReturn(brands);
+        PaginatedResult<BrandResponse> brandResponses = new PaginatedResult<>(
+                expectedBrandList, page, size, expectedBrandList.size());
 
-        when(brandResponseMapper.brandToBrandResponse(any(Brand.class))).thenReturn(brandResponse);
+        when(brandServicePort.findAll(any(PaginationRequest.class), anyString())).thenReturn(brands);
 
-        Page<BrandResponse> result = brandHandler.findAll(page, size, sort);
+        when(brandResponseMapper.brandsToBrandResponses(any())).thenReturn(brandResponses);
 
-        assertEquals(expectedBrandList, result.getContent());
-        verify(findAllBrandsServicePort, times(1)).findAll(page, size, sort);
+        PaginatedResult<BrandResponse> result = brandHandler.findAll(page, size, sort);
+
+        assertEquals(expectedBrandList.get(0).getName(), result.getItems().get(0).getName());
+        assertEquals(expectedBrandList.get(0).getDescription(), result.getItems().get(0).getDescription());
+        verify(brandServicePort, times(1)).findAll(any(PaginationRequest.class), anyString());
     }
 }

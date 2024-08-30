@@ -2,14 +2,14 @@ package com.emazon.stock_v1.infraestructure.input.rest;
 
 import com.emazon.stock_v1.application.dto.BrandRequest;
 import com.emazon.stock_v1.application.handler.IBrandHandler;
-import com.emazon.stock_v1.helpers.GlobalConstants;
 import com.emazon.stock_v1.infraestructure.out.jpa.entity.BrandEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.IBrandRepository;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,28 +46,34 @@ class BrandRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    @DisplayName("Should verify the expected 201 status")
-    void saveTest() throws Exception {
-        String brandJson = """
+    private String brandJson;
+    private BrandEntity brandEntity;
+
+    @BeforeEach
+    void setUp() {
+        brandJson = """
                 {
                 "name": "Asus",
                 "description": "Hardware de informática y electrónica de consumo."
                 }
                 """;
 
-        BrandEntity brandEntity = new BrandEntity(
+        brandEntity = new BrandEntity(
                 1L, "Asus", "Hardware de informática y electrónica de consumo.");
+    }
+
+    @Test
+    void when_save_expect_createdStatus() throws Exception {
 
         when(brandRepository.save(any(BrandEntity.class))).thenReturn(brandEntity);
 
         mockMvc.perform(post("/brands/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(brandJson))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(brandJson))
                 .andExpect(status().isCreated());
     }
 
-    private static Stream<Arguments> providedBrandRequestsForSaveBrandException(){
+    private static Stream<Arguments> providedSave_shouldReturnBadRequest_whenValidationFails() {
         return Stream.of(
                 Arguments.of("""
                         {
@@ -117,35 +123,25 @@ class BrandRestControllerTest {
                         "description": "descriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescription
                         descriptiondescriptiondescriptiondescriptiondescriptiondescription",
                         }
-                        """)
+                        """),
+                Arguments.of("{}")
         );
     }
 
-    @DisplayName("Should verify the expected 400 status")
     @ParameterizedTest
-    @MethodSource("providedBrandRequestsForSaveBrandException")
-    void saveBrandBadRequestExceptionTest(String brandJson) throws Exception {
+    @MethodSource("providedSave_shouldReturnBadRequest_whenValidationFails")
+    void save_shouldReturnBadRequest_whenValidationFails(String brandJson) throws Exception {
 
         doCallRealMethod().when(brandHandler).save(any(BrandRequest.class));
 
         mockMvc.perform(post("/brands/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(brandJson))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(brandJson))
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("Should verify the expected 409 status")
     @Test
-    void saveBrandConflictExceptionTest() throws Exception {
-        String brandJson = """
-                {
-                "name": "Asus",
-                "description": "Hardware de informática y electrónica de consumo."
-                }
-                """;
-
-        BrandEntity brandEntity = new BrandEntity(
-                1L, "Asus", "Hardware de informática y electrónica de consumo.");
+    void expect_ConflictStatus_when_brandExists() throws Exception {
 
         Optional<BrandEntity> optionalBrandEntity = Optional.of(brandEntity);
 
@@ -157,36 +153,54 @@ class BrandRestControllerTest {
                 .andExpect(status().isConflict());
     }
 
-    @DisplayName("Should verify the expected 200 status")
     @Test
-    void findAllTest() throws Exception {
-        int page = 0, size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.BRAND_SORT_BY).ascending());
+    void when_findAll_expect_statusOk() throws Exception {
 
-        List<BrandEntity> brandEntityList = new ArrayList<>();
-        brandEntityList.add(
+        List<BrandEntity> brandEntities = new ArrayList<>();
+        brandEntities.add(
                 new BrandEntity(1L, "Asus", "Hardware de informática y electrónica de consumo."));
 
-        Page<BrandEntity> brandEntities = new PageImpl<>(brandEntityList, pageable, brandEntityList.size());
-
-        when(brandRepository.findAll(any(Pageable.class))).thenReturn(brandEntities);
+        when(brandRepository.findAll()).thenReturn(brandEntities);
 
         mockMvc.perform(get("/brands/"))
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("Should verify the expected 400 status when brands not found")
+    @ParameterizedTest
+    @CsvSource(value = {
+            "/brands/?sortDirection=desc",
+            "/brands/?sortDirection=asc",
+    })
+    void when_findAllOrdered_expect_statusOk(String url) throws Exception {
+        List<BrandEntity> brandEntities = new ArrayList<>();
+
+        brandEntities.add(brandEntity);
+
+        when(brandRepository.findAll(any(Sort.class))).thenReturn(brandEntities);
+
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk());
+    }
+
     @Test
     void findAll_shouldThrowBrandsNotFoundException() throws Exception {
 
-        int page = 0, size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.BRAND_SORT_BY).ascending());
-        List<BrandEntity> brandEntityList = new ArrayList<>();
-        Page<BrandEntity> brandEntities = new PageImpl<>(brandEntityList, pageable, brandEntityList.size());
+        List<BrandEntity> brandEntities = new ArrayList<>();
 
-        when(brandRepository.findAll(any(Pageable.class))).thenReturn(brandEntities);
+        when(brandRepository.findAll()).thenReturn(brandEntities);
 
         mockMvc.perform(get("/brands/"))
                 .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "/brands/?page=-1",
+            "/brands/?size=-1"
+    })
+    void expect_statusBadRequest_when_paginationParametersAreWrong(String url) throws Exception{
+
+        mockMvc.perform(get(url))
+                .andExpect(status().isBadRequest());
     }
 }

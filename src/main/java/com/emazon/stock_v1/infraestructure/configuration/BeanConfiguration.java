@@ -17,9 +17,13 @@ import com.emazon.stock_v1.infraestructure.out.jpa.repository.IItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableSpringDataWebSupport(
+        pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO
+)
 public class BeanConfiguration {
 
     private final ICategoryRepository categoryRepository;
@@ -35,13 +39,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public ISaveCategoryServicePort saveCategoryServicePort() {
-        return new SaveCategoryUseCase(categoryPersistencePort());
-    }
-
-    @Bean
-    public IFindAllCategoriesServicePort findAllCategoriesServicePort() {
-        return new FindAllCategoriesUseCase(categoryPersistencePort());
+    public ICategoryServicePort categoryServicePort() {
+        return new CategoryUseCase(categoryPersistencePort());
     }
 
     @Bean
@@ -50,24 +49,17 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public ISaveBrandServicePort saveBrandServicePort() {
-        return new SaveBrandUseCase(brandPersistencePort());
-    }
-
-    @Bean
-    public IFindAllBrandsServicePort findAllBrandsServicePort() {
-        return new FindAllBrandsUseCase(brandPersistencePort());
+    public IBrandServicePort brandServicePort() {
+        return new BrandUseCase(brandPersistencePort());
     }
 
     @Bean
     public IItemPersistencePort itemPersistencePort(){
-        return new ItemJpaAdapter(
-                itemRepository, brandRepository, categoryRepository,
-                itemEntityMapper, brandEntityMapper, categoryEntityMapper);
+        return new ItemJpaAdapter(itemRepository, itemEntityMapper);
     }
 
     @Bean
-    public ISaveItemServicePort saveItemServicePort() {
-        return new SaveItemUseCase(itemPersistencePort());
+    public IItemServicePort itemServicePort() {
+        return new ItemUseCase(itemPersistencePort(), categoryPersistencePort(), brandPersistencePort());
     }
 }

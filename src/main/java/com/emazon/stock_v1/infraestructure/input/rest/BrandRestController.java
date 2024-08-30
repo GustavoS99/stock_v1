@@ -3,22 +3,25 @@ package com.emazon.stock_v1.infraestructure.input.rest;
 import com.emazon.stock_v1.application.dto.BrandRequest;
 import com.emazon.stock_v1.application.dto.BrandResponse;
 import com.emazon.stock_v1.application.handler.IBrandHandler;
-import com.emazon.stock_v1.helpers.GlobalConstants;
+import com.emazon.stock_v1.domain.model.PaginatedResult;
+import com.emazon.stock_v1.utils.GlobalConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/brands")
 @RequiredArgsConstructor
+@Validated
 public class BrandRestController {
     private final IBrandHandler brandHandler;
 
@@ -29,7 +32,7 @@ public class BrandRestController {
     })
     @Operation(summary = "Add a new brand")
     @PostMapping("/")
-    public ResponseEntity<Void> save(@RequestBody BrandRequest brandRequest) {
+    public ResponseEntity<Void> save(@Valid @RequestBody BrandRequest brandRequest) {
         brandHandler.save(brandRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -42,10 +45,10 @@ public class BrandRestController {
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
     })
     @GetMapping("/")
-    public ResponseEntity<Page<BrandResponse>> findAll(
+    public ResponseEntity<PaginatedResult<BrandResponse>> findAll(
             @RequestParam(defaultValue = GlobalConstants.DEFAULT_PAGE) int page,
             @RequestParam(defaultValue = GlobalConstants.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(defaultValue = GlobalConstants.ASCENDING_SORT) String sortDirection) {
+            @RequestParam(defaultValue = GlobalConstants.EMPTY_STRING) String sortDirection) {
         return ResponseEntity.ok(brandHandler.findAll(page, size, sortDirection));
     }
 }
