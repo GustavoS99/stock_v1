@@ -3,22 +3,25 @@ package com.emazon.stock_v1.infraestructure.input.rest;
 import com.emazon.stock_v1.application.dto.CategoryRequest;
 import com.emazon.stock_v1.application.dto.CategoryResponse;
 import com.emazon.stock_v1.application.handler.ICategoryHandler;
-import com.emazon.stock_v1.helpers.GlobalConstants;
+import com.emazon.stock_v1.domain.model.PaginatedResult;
+import com.emazon.stock_v1.utils.GlobalConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
+@Validated
 public class CategoryRestController {
 
     private final ICategoryHandler categoryHandler;
@@ -30,7 +33,7 @@ public class CategoryRestController {
             @ApiResponse(responseCode = "400", description = "Category name or description is empty", content = @Content),
     })
     @PostMapping("/")
-    public ResponseEntity<Void> saveCategory(@RequestBody CategoryRequest categoryRequest) {
+    public ResponseEntity<Void> saveCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
         categoryHandler.save(categoryRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -43,10 +46,10 @@ public class CategoryRestController {
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content),
     })
     @GetMapping("/")
-    public ResponseEntity<Page<CategoryResponse>> findAll(
+    public ResponseEntity<PaginatedResult<CategoryResponse>> findAll(
             @RequestParam(defaultValue = GlobalConstants.DEFAULT_PAGE) int page,
             @RequestParam(defaultValue = GlobalConstants.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(defaultValue = GlobalConstants.ASCENDING_SORT) String sortDirection) {
+            @RequestParam(defaultValue = GlobalConstants.EMPTY_STRING) String sortDirection) {
         return ResponseEntity.ok(categoryHandler.findAll(page, size, sortDirection));
     }
 }
