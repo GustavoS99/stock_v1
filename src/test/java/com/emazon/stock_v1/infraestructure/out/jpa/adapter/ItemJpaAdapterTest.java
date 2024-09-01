@@ -10,21 +10,24 @@ import com.emazon.stock_v1.infraestructure.out.jpa.entity.ItemEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.ItemEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.IItemRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemJpaAdapterTest {
@@ -40,6 +43,8 @@ class ItemJpaAdapterTest {
 
     private Item item;
     private ItemEntity itemEntity;
+    private List<ItemEntity> itemEntities;
+    private List<Item> items;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +66,12 @@ class ItemJpaAdapterTest {
                 10, new BigDecimal(2000000),
                 brand,
                 Collections.singleton(category));
+
+        itemEntities = new ArrayList<>();
+        itemEntities.add(itemEntity);
+
+        items = new ArrayList<>();
+        items.add(item);
     }
 
     @Test
@@ -80,12 +91,111 @@ class ItemJpaAdapterTest {
         assertEquals(item.getQuantity(), savedItem.getQuantity());
     }
 
-    @DisplayName("Should throw ItemAlreadyExistsException when item exists")
     @Test
     void save_shouldThrowItemAlreadyExistsException_when_itemExists() {
 
         when(itemRepository.findByName(anyString())).thenReturn(Optional.of(itemEntity));
 
         assertThrows(ItemAlreadyExistsException.class, () -> itemJpaAdapter.save(item));
+    }
+
+    @Test
+    void when_findAll_expect_callToRepository() {
+
+        when(itemRepository.findAll()).thenReturn(itemEntities);
+
+        when(itemEntityMapper.itemEntitiesToItems(anyList())).thenReturn(items);
+
+        List<Item> result = itemJpaAdapter.findAll();
+
+        assertEquals(items, result);
+
+        verify(itemRepository, times(1)).findAll();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "categories.name, desc",
+            "brand.name, desc"
+    })
+    void when_findAllOrdered_expect_callToRepository(String sortProperty, String sortDirection) {
+
+        when(itemRepository.findAll(any(Sort.class))).thenReturn(itemEntities);
+
+        when(itemEntityMapper.itemEntitiesToItems(anyList())).thenReturn(items);
+
+        List<Item> result = itemJpaAdapter.findAll(sortProperty, sortDirection);
+
+        assertEquals(items, result);
+
+        verify(itemRepository, times(1)).findAll(any(Sort.class));
+    }
+
+    @Test
+    void when_findByCategoryId_expect_callToRepository() {
+        Long categoryId = 1L;
+
+        when(itemRepository.findByCategoriesId(anyLong())).thenReturn(itemEntities);
+
+        when(itemEntityMapper.itemEntitiesToItems(anyList())).thenReturn(items);
+
+        List<Item> result = itemJpaAdapter.findByCategoryId(categoryId);
+
+        assertEquals(items, result);
+
+        verify(itemRepository, times(1)).findByCategoriesId(categoryId);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "categories.name, desc",
+            "brand.name, desc"
+    })
+    void when_findByCategoryIdOrdered_expect_callToRepository(String sortProperty, String sortDirection) {
+        Long categoryId = 1L;
+
+        when(itemRepository.findByCategoriesId(anyLong(), any(Sort.class))).thenReturn(itemEntities);
+
+        when(itemEntityMapper.itemEntitiesToItems(anyList())).thenReturn(items);
+
+        List<Item> result = itemJpaAdapter.findByCategoryId(categoryId, sortProperty, sortDirection);
+
+        assertEquals(items, result);
+
+        verify(itemRepository, times(1)).findByCategoriesId(anyLong(), any(Sort.class));
+    }
+
+    @Test
+    void when_findByBrandName_expect_callToRepository() {
+        String brandName = "Asus";
+
+        when(itemRepository.findByBrandName(anyString())).thenReturn(itemEntities);
+
+        when(itemEntityMapper.itemEntitiesToItems(anyList())).thenReturn(items);
+
+        List<Item> result = itemJpaAdapter.findByBrandName(brandName);
+
+        assertEquals(items, result);
+
+        verify(itemRepository, times(1)).findByBrandName(brandName);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "categories.name, desc",
+            "brand.name, desc"
+    })
+    void when_findByBrandNameOrdered_expect_callToRepository(String sortProperty, String sortDirection) {
+        String brandName = "Asus";
+
+        when(itemRepository.findByBrandName(anyString(), any(Sort.class))).thenReturn(itemEntities);
+
+        when(itemEntityMapper.itemEntitiesToItems(anyList())).thenReturn(items);
+
+        List<Item> result = itemJpaAdapter.findByBrandName(brandName, sortProperty, sortDirection);
+
+        assertEquals(items, result);
+
+        verify(itemRepository, times(1)).findByBrandName(anyString(), any(Sort.class));
     }
 }
