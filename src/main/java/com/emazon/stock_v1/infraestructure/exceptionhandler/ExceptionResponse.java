@@ -24,7 +24,8 @@ public enum ExceptionResponse {
     INVALID_NUM_OF_CATEGORIES(
             "The num of categories is invalid. It must have a minimum of 1 and a maximum of 3 categories."),
     ITEM_HAS_DUPLICATE_CATEGORIES("The given categories are duplicated"),
-    ITEMS_NOT_FOUND("No items found");
+    ITEMS_NOT_FOUND("No items found"),
+    PAGE_EXCEED_PAGES("The given page does not exists");
 
     private String message;
 

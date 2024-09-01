@@ -38,6 +38,7 @@ public class GlobalConstants {
             "The description field is too long. It must have a maximum of 200 characters.";
     public static final String EMPTY_BRAND_OF_ITEM_MESSAGE = "The brand is empty";
     public static final String EMPTY_CATEGORIES_OF_ITEM_MESSAGE = "The categories are empty";
+    public static final String ASCENDING_SORT = "ASC";
 
     private GlobalConstants() {
         throw new IllegalStateException("Utility class");

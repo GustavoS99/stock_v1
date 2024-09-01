@@ -6,6 +6,8 @@ import com.emazon.stock_v1.domain.model.Category;
 import com.emazon.stock_v1.domain.model.PaginatedResult;
 import com.emazon.stock_v1.domain.model.PaginationRequest;
 import com.emazon.stock_v1.domain.spi.ICategoryPersistencePort;
+import com.emazon.stock_v1.domain.exception.CategoryAlreadyExistsException;
+import com.emazon.stock_v1.domain.exception.CategoriesNotFoundException;
 import com.emazon.stock_v1.utils.GlobalConstants;
 
 import java.util.List;
@@ -24,7 +26,15 @@ public class CategoryUseCase implements ICategoryServicePort {
 
         validateDescriptionInput(category);
 
+        validateIfCategoryExists(category.getName());
+
         categoryPersistencePort.save(category);
+    }
+
+    private void validateIfCategoryExists(String name) {
+        if(categoryPersistencePort.findByName(name).isPresent()) {
+            throw new CategoryAlreadyExistsException();
+        }
     }
 
     private void validateDescriptionInput(Category category) {
@@ -53,14 +63,29 @@ public class CategoryUseCase implements ICategoryServicePort {
                 || paginationRequest.getSize() <= GlobalConstants.START_PAGE_SIZE) {
             throw new InvalidPaginationParametersException();
         }
-        List<Category> categories = categoryPersistencePort.findAll(sortDirection);
-
-        List<Category> paginatedCategories = getPaginated(
-                categories, paginationRequest.getPage(), paginationRequest.getSize());
+        List<Category> categories = validateIfListIsEmpty(categoryPersistencePort.findAll(sortDirection));
 
         int totalPages = (int) Math.ceil((double) categories.size() / paginationRequest.getSize());
 
+        List<Category> paginatedCategories = getPaginated(
+                categories, validatePage(paginationRequest.getPage(), totalPages), paginationRequest.getSize());
+
         return new PaginatedResult<>(paginatedCategories, paginationRequest.getPage(), totalPages, categories.size());
+    }
+
+    private List<Category> validateIfListIsEmpty(List<Category> all) {
+        if(all.isEmpty())
+            throw new CategoriesNotFoundException();
+
+        return all;
+    }
+
+    private int validatePage(int page, int totalPages) {
+
+        if(page >= totalPages)
+            throw new PageExceedTotalPagesException();
+
+        return page;
     }
 
     private List<Category> getPaginated(List<Category> categories, int page, int size) {

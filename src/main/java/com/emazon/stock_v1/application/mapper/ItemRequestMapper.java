@@ -9,7 +9,5 @@ import org.mapstruct.Mapping;
 public interface ItemRequestMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "brand.id", ignore = true)
-    @Mapping(target = "brand", source = "brandRequest")
-    @Mapping(target = "categories", source = "categoryRequests")
     Item itemRequestToItem(ItemRequest itemRequest);
 }

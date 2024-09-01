@@ -1,8 +1,6 @@
 package com.emazon.stock_v1.infraestructure.out.jpa.adapter;
 
 import com.emazon.stock_v1.domain.model.Category;
-import com.emazon.stock_v1.infraestructure.exception.CategoriesNotFoundException;
-import com.emazon.stock_v1.infraestructure.exception.CategoryAlreadyExistsException;
 import com.emazon.stock_v1.infraestructure.out.jpa.entity.CategoryEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.CategoryEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.ICategoryRepository;
@@ -18,11 +16,9 @@ import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,18 +64,6 @@ class CategoryJpaAdapterTest {
         assertEquals(savedCategory.getDescription(), result.getDescription());
     }
 
-    @Test
-    void save_shouldThrowCategoryAlreadyExistsException_whenCategoryExists() {
-        CategoryEntity existingCategoryEntity = new CategoryEntity(
-                category.getId(), category.getName(), category.getDescription());
-
-        when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(existingCategoryEntity));
-
-        assertThrows(CategoryAlreadyExistsException.class, () -> {
-            categoryJpaAdapter.save(category);
-        });
-    }
-
     @ParameterizedTest
     @CsvSource(value = {
             "null",
@@ -112,31 +96,5 @@ class CategoryJpaAdapterTest {
         } else {
             verify(categoryRepository, times(1)).findAll(any(Sort.class));
         }
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {
-            "null",
-            "''",
-            "desc",
-            "asc"
-    }, nullValues = {"null"})
-    void expect_CategoriesNotFoundException_when_thereIsNoCategoriesStored(String sortDirection) {
-
-        List<CategoryEntity> categoryEntities = new ArrayList<>();
-
-        List<Category> categories = new ArrayList<>();
-
-        if(sortDirection == null || sortDirection.isEmpty()){
-            when(categoryRepository.findAll()).thenReturn(categoryEntities);
-        } else {
-            when(categoryRepository.findAll(any(Sort.class))).thenReturn(categoryEntities);
-        }
-
-        when(categoryEntityMapper.categoryEntitiesToCategory(anyList())).thenReturn(categories);
-
-        assertThrows(CategoriesNotFoundException.class, () -> {
-            categoryJpaAdapter.findAll(sortDirection);
-        });
     }
 }
