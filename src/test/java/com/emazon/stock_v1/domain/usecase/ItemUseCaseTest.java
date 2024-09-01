@@ -4,6 +4,7 @@ import com.emazon.stock_v1.domain.exception.*;
 import com.emazon.stock_v1.domain.model.Brand;
 import com.emazon.stock_v1.domain.model.Category;
 import com.emazon.stock_v1.domain.model.Item;
+import com.emazon.stock_v1.domain.model.PaginationRequest;
 import com.emazon.stock_v1.domain.spi.IBrandPersistencePort;
 import com.emazon.stock_v1.domain.spi.ICategoryPersistencePort;
 import com.emazon.stock_v1.domain.spi.IItemPersistencePort;
@@ -21,13 +22,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.emazon.stock_v1.utils.Helpers.isOrdered;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -195,5 +194,128 @@ class ItemUseCaseTest {
         when(categoryPersistencePort.findByName(anyString())).thenReturn(Optional.empty());
 
         assertThrows(CategoryNotFoundException.class, () -> itemUseCase.save(item));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "0, 2, , ,",
+            "0, 2, , desc,",
+            "0, 2, category, ,",
+            "0, 2, category, asc, categories.name",
+            "0, 2, brand, desc, brand.name",
+            "0, 2, name, desc, name"
+    }, nullValues = {"null"})
+    void when_findAll_expect_callToPersistence(
+            int page, int size, String sortProperty, String sortDirection, String expectSortProperty
+    ) {
+
+        PaginationRequest paginationRequest = new PaginationRequest(page, size);
+
+        List<Item> items = new ArrayList<>();
+        items.add(item);
+
+        if(isOrdered(sortProperty, sortDirection)) {
+            when(itemPersistencePort.findAll(expectSortProperty, sortDirection)).thenReturn(items);
+        } else {
+            when(itemPersistencePort.findAll()).thenReturn(items);
+        }
+
+        itemUseCase.findAll(paginationRequest, sortProperty, sortDirection);
+
+        if(isOrdered(sortProperty, sortDirection)) {
+            verify(itemPersistencePort, times(1)).findAll(expectSortProperty, sortDirection);
+        } else {
+            verify(itemPersistencePort, times(1)).findAll();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            ",",
+            "name, desc"
+    }, nullValues = {"null"})
+    void when_findByCategory_expect_callToPersistence(String sortProperty, String sortDirection) {
+        int page = 0, size = 10;
+        Long categoryId = 1L;
+
+        PaginationRequest paginationRequest = new PaginationRequest(page, size);
+
+        List<Item> items = new ArrayList<>();
+        items.add(item);
+
+        if(isOrdered(sortProperty, sortDirection)) {
+            when(itemPersistencePort.findByCategoryId(categoryId, sortProperty, sortDirection)).thenReturn(items);
+        } else {
+            when(itemPersistencePort.findByCategoryId(categoryId)).thenReturn(items);
+        }
+
+        itemUseCase.findByCategory(categoryId, paginationRequest, sortProperty, sortDirection);
+
+        if(isOrdered(sortProperty, sortDirection)) {
+            verify(itemPersistencePort, times(1))
+                    .findByCategoryId(categoryId, sortProperty, sortDirection);
+        } else {
+            verify(itemPersistencePort, times(1))
+                    .findByCategoryId(categoryId);
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            ",",
+            "name, desc"
+    }, nullValues = {"null"})
+    void when_findByBrandName_expect_callToPersistence(String sortProperty, String sortDirection) {
+        int page = 0, size = 10;
+        String brandName = "Asus";
+
+        PaginationRequest paginationRequest = new PaginationRequest(page, size);
+
+        List<Item> items = new ArrayList<>();
+        items.add(item);
+
+        if(isOrdered(sortProperty, sortDirection)) {
+            when(itemPersistencePort.findByBrandName(brandName, sortProperty, sortDirection)).thenReturn(items);
+        } else {
+            when(itemPersistencePort.findByBrandName(brandName)).thenReturn(items);
+        }
+
+        itemUseCase.findByBrandName(brandName, paginationRequest, sortProperty, sortDirection);
+
+        if(isOrdered(sortProperty, sortDirection)) {
+            verify(itemPersistencePort, times(1))
+                    .findByBrandName(brandName, sortProperty, sortDirection);
+        } else {
+            verify(itemPersistencePort, times(1)).findByBrandName(brandName);
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "-1, 2, name, asc",
+            "1, -2, name, desc",
+    })
+    void expect_InvalidPaginationParametersException_when_pageOrSizeAreBad(
+            int page, int size, String sortProperty, String sortDirection
+    ) {
+
+        PaginationRequest paginationRequest = new PaginationRequest(page, size);
+
+        assertThrows(InvalidPaginationParametersException.class, () ->
+                itemUseCase.findAll(paginationRequest, sortProperty, sortDirection));
+    }
+
+    @Test
+    void expect_ItemsNotFoundException_when_thereAreNoItemsStored() {
+        int page = 0, size = 10;
+        String sortProperty = "", sortDirection = "asc";
+        PaginationRequest paginationRequest = new PaginationRequest(page, size);
+
+        List<Item> items = new ArrayList<>();
+
+        when(itemPersistencePort.findAll()).thenReturn(items);
+
+        assertThrows(ItemsNotFoundException.class, () -> itemUseCase
+                .findAll(paginationRequest, sortProperty, sortDirection));
     }
 }
