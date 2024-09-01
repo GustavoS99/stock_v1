@@ -11,4 +11,12 @@ public interface IItemRepository extends JpaRepository<ItemEntity, Long> {
     Optional<ItemEntity> findByName(String name);
 
     List<ItemEntity> findAll(Sort sort);
+
+    List<ItemEntity> findByCategoriesId(Long categoriesId);
+
+    List<ItemEntity> findByCategoriesId(Long categoriesId, Sort sort);
+
+    List<ItemEntity> findByBrandName(String brandName);
+
+    List<ItemEntity> findByBrandName(String brandName, Sort sort);
 }
