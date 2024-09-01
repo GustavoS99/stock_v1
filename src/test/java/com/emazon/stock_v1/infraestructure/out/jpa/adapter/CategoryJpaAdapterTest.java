@@ -1,16 +1,14 @@
 package com.emazon.stock_v1.infraestructure.out.jpa.adapter;
 
-import com.emazon.stock_v1.helpers.GlobalConstants;
 import com.emazon.stock_v1.domain.model.Category;
-import com.emazon.stock_v1.infraestructure.exception.CategoriesNotFoundException;
-import com.emazon.stock_v1.infraestructure.exception.CategoryAlreadyExistsException;
 import com.emazon.stock_v1.infraestructure.out.jpa.entity.CategoryEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.CategoryEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.ICategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,13 +16,10 @@ import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,16 +42,15 @@ class CategoryJpaAdapterTest {
     @BeforeEach
     void setUp() {
         category = new Category(1L, "Electrónica", "Artículos electrónicos");
-        categoryEntity = new CategoryEntity(1L,"Electrónica", "Artículos electrónicos");
+        categoryEntity = new CategoryEntity(category.getId(),category.getName(), category.getDescription());
     }
 
-    @DisplayName("Should validate the returned value of CategoryJpaAdapter.save(Category.class)")
     @Test
-    void saveTest() {
+    void when_saveCategory_expect_fieldsSavedSuccessfully() {
         CategoryEntity savedCategoryEntity = new CategoryEntity(
-                1L, "Electrónica", "Artículos Electrónicos");
+                category.getId(), category.getName(), category.getDescription());
 
-        Category savedCategory = new Category(1L, "Electrónica", "Artículos Electrónicos");
+        Category savedCategory = new Category(category.getId(), category.getName(), category.getDescription());
 
         when(categoryEntityMapper.categoryToCategoryEntity(any(Category.class))).thenReturn(categoryEntity);
         when(categoryRepository.save(any(CategoryEntity.class))).thenReturn(savedCategoryEntity);
@@ -70,60 +64,37 @@ class CategoryJpaAdapterTest {
         assertEquals(savedCategory.getDescription(), result.getDescription());
     }
 
-    @Test
-    void save_shouldThrowCategoryAlreadyExistsException_whenCategoryExists() {
-        CategoryEntity existingCategoryEntity = new CategoryEntity(
-                1L, "Electrónica", "Artículos Electrónicos");
+    @ParameterizedTest
+    @CsvSource(value = {
+            "null",
+            "''",
+            "desc",
+            "asc"
+    }, nullValues = {"null"})
+    void when_findAll_expect_ListReturnedSuccessfully(String sortDirection){
 
-        Category existingCategory = new Category(1L, "Electrónica", "Artículos Electrónicos");
+        List<CategoryEntity> categoryEntities = new ArrayList<>();
+        categoryEntities.add(categoryEntity);
 
-        when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(existingCategoryEntity));
+        List<Category> categories = new ArrayList<>();
+        categories.add(category);
 
-        assertThrows(CategoryAlreadyExistsException.class, () -> {
-            categoryJpaAdapter.save(existingCategory);
-        });
-    }
+        if(sortDirection == null || sortDirection.isEmpty()){
+            when(categoryRepository.findAll()).thenReturn(categoryEntities);
+        } else {
+            when(categoryRepository.findAll(any(Sort.class))).thenReturn(categoryEntities);
+        }
 
-    @Test
-    void findAllTest(){
-        int page = 0, size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.CATEGORY_SORT_BY).ascending());
+        when(categoryEntityMapper.categoryEntitiesToCategory(anyList())).thenReturn(categories);
 
-        List<CategoryEntity> categoryEntitiesList = new ArrayList<>();
-        categoryEntitiesList.add(categoryEntity);
+        List<Category> result = categoryJpaAdapter.findAll(sortDirection);
 
-        Page<CategoryEntity> categoryEntities = new PageImpl<>(
-                categoryEntitiesList, pageable, categoryEntitiesList.size());
+        assertEquals(categories, result);
 
-        List<Category> categoryList = new ArrayList<>();
-        categoryList.add(category);
-
-        Page<Category> categories = new PageImpl<>(categoryList, pageable, categoryEntitiesList.size());
-
-        when(categoryRepository.findAll(any(Pageable.class))).thenReturn(categoryEntities);
-        when(categoryEntityMapper.categoryEntityToCategory(any(CategoryEntity.class))).thenReturn(category);
-
-        Page<Category> result = categoryJpaAdapter.findAll(pageable);
-
-        assertEquals(categories.getContent(), result.getContent());
-
-        verify(categoryRepository, times(1)).findAll(pageable);
-        verify(categoryEntityMapper, times(1))
-                .categoryEntityToCategory(any(CategoryEntity.class));
-    }
-
-    @Test
-    void findAll_shouldThrowCategoriesNotFoundException() {
-        int page = 0, size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(GlobalConstants.CATEGORY_SORT_BY).ascending());
-        List<CategoryEntity> categoryEntitiesList = new ArrayList<>();
-        Page<CategoryEntity> categoryEntities = new PageImpl<>(
-                categoryEntitiesList, pageable, categoryEntitiesList.size());
-
-        when(categoryRepository.findAll(any(Pageable.class))).thenReturn(categoryEntities);
-
-        assertThrows(CategoriesNotFoundException.class, () -> {
-            categoryJpaAdapter.findAll(pageable);
-        });
+        if(sortDirection == null || sortDirection.isEmpty()) {
+            verify(categoryRepository, times(1)).findAll();
+        } else {
+            verify(categoryRepository, times(1)).findAll(any(Sort.class));
+        }
     }
 }

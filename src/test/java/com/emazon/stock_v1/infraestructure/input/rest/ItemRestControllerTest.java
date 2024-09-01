@@ -8,6 +8,7 @@ import com.emazon.stock_v1.infraestructure.out.jpa.entity.ItemEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.IBrandRepository;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.ICategoryRepository;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.IItemRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,10 +56,14 @@ class ItemRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @DisplayName("Should verify the expected 201 status")
-    @Test
-    void saveTest() throws Exception {
-        String itemJson = """
+    private String itemJson;
+    private ItemEntity itemEntity;
+    private BrandEntity brandEntity;
+    private CategoryEntity categoryEntity;
+
+    @BeforeEach
+    void setUp() {
+        itemJson = """
                 {
                 "name" : "Portatil XYZ",
                 "description" : "Disco duro: xx,  Ram: xx, Procesador: xx",
@@ -69,13 +74,17 @@ class ItemRestControllerTest {
                 }
                 """;
 
-        BrandEntity brandEntity = new BrandEntity(
+        brandEntity = new BrandEntity(
                 1L, "Asus", "Hardware de informática y electrónica de consumo.");
-        CategoryEntity categoryEntity = new CategoryEntity(1L, "Electrónica","Dispositivos tecnológicos");
-        ItemEntity itemEntity = new ItemEntity(1L, "Portatil XYZ", "Disco duro: xx,  Ram: xx, Procesador: xx",
+        categoryEntity = new CategoryEntity(1L, "Electrónica","Dispositivos tecnológicos");
+        itemEntity = new ItemEntity(1L, "Portatil XYZ", "Disco duro: xx,  Ram: xx, Procesador: xx",
                 10L, new BigDecimal(2000000),
                 brandEntity,
                 Collections.singleton(categoryEntity));
+    }
+
+    @Test
+    void when_save_expect_createdStatus() throws Exception {
 
         when(brandRepository.findByName(anyString())).thenReturn(Optional.of(brandEntity));
 
@@ -89,7 +98,7 @@ class ItemRestControllerTest {
                 .andExpect(status().isCreated());
     }
 
-    private static Stream<Arguments> providedItemRequestsForSaveItemException() {
+    private static Stream<Arguments> providedSave_shouldReturnBadRequest_whenValidationFails() {
         return Stream.of(
                 Arguments.of("""
                         {
@@ -280,7 +289,8 @@ class ItemRestControllerTest {
                         "quantity" : 10,
                         "price" : 2000000,
                         "brandRequest" : { "name" : "Asus" },
-                        "categoryRequests" : [ { "name" : "Electrónica1" },
+                        "categoryRequests" : [
+                            { "name" : "Electrónica1" },
                             { "name" : "Electrónica2" },
                             { "name" : "Electrónica3" },
                             { "name" : "Electrónica4" } ]
@@ -291,37 +301,22 @@ class ItemRestControllerTest {
 
     @DisplayName("Should verify the expected 400 status")
     @ParameterizedTest
-    @MethodSource("providedItemRequestsForSaveItemException")
-    void saveItemBadRequestExceptionTest(String itemJson) throws Exception {
+    @MethodSource("providedSave_shouldReturnBadRequest_whenValidationFails")
+    void save_shouldReturnBadRequest_whenValidationFails(String itemExceptionJson) throws Exception {
         doCallRealMethod().when(itemHandler).save(any(ItemRequest.class));
 
         mockMvc.perform(post("/items/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(itemJson))
+                .content(itemExceptionJson))
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("Should verify the expected 409 status")
     @Test
-    void saveItemConflictExceptionTest() throws Exception {
-        String itemJson = """
-                {
-                "name" : "Portatil XYZ",
-                "description" : "Disco duro: xx,  Ram: xx, Procesador: xx",
-                "quantity" : 10,
-                "price" : 2000000,
-                "brandRequest" : { "name" : "Asus" },
-                "categoryRequests" : [ { "name" : "Electrónica" } ]
-                }
-                """;
+    void expect_ConflictStatus_when_itemExists() throws Exception {
 
-        BrandEntity brandEntity = new BrandEntity(
-                1L, "Asus", "Hardware de informática y electrónica de consumo.");
-        CategoryEntity categoryEntity = new CategoryEntity(1L, "Electrónica","Dispositivos tecnológicos");
-        ItemEntity itemEntity = new ItemEntity(1L, "Portatil XYZ", "Disco duro: xx,  Ram: xx, Procesador: xx",
-                10L, new BigDecimal(2000000),
-                brandEntity,
-                Collections.singleton(categoryEntity));
+        when(brandRepository.findByName(anyString())).thenReturn(Optional.of(brandEntity));
+
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(categoryEntity));
 
         when(itemRepository.findByName(anyString())).thenReturn(Optional.of(itemEntity));
 
@@ -329,5 +324,28 @@ class ItemRestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(itemJson))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void expect_NotFoundStatus_when_brandDoesNotExist() throws Exception {
+        when(brandRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/items/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(itemJson))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void expect_NotFoundStatus_when_categoryDoesNotExist() throws Exception {
+
+        when(brandRepository.findByName(anyString())).thenReturn(Optional.of(brandEntity));
+
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/items/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(itemJson))
+                .andExpect(status().isNotFound());
     }
 }

@@ -10,21 +10,22 @@ public enum ExceptionResponse {
     ITEM_ALREADY_EXISTS("There is already a item with that name"),
     EMPTY_NAME("The name field is empty"),
     EMPTY_DESCRIPTION("The description field is empty"),
-    INVALID_LENGTH_NAME(
-            "The name field is empty or maybe too long. It must have a maximum of 50 characters."),
+    INVALID_LENGTH_NAME("The name field too long. It must have a maximum of 50 characters."),
 
     INVALID_LENGTH_CATEGORY_DESCRIPTION(
-            "The description field is empty or maybe too long. It must have a maximum of 90 characters."),
+            "The description field is too long. It must have a maximum of 90 characters."),
     INVALID_LENGTH_BRAND_DESCRIPTION(
-            "The description field is empty or maybe too long. It must have a maximum of 150 characters."),
+            "The description field is too long. It must have a maximum of 150 characters."),
     INVALID_LENGTH_ITEM_DESCRIPTION(
-            "The description field is empty or maybe too long. It must have a 200 characters."),
+            "The description field is too long. It must have a 200 characters."),
     BRAND_NOT_FOUND("The brand with that name does not exist."),
     CATEGORY_NOT_FOUND("The category with that name does not exist."),
     EMPTY_BRAND_OF_ITEM("The given brand is empty"),
     INVALID_NUM_OF_CATEGORIES(
             "The num of categories is invalid. It must have a minimum of 1 and a maximum of 3 categories."),
-    ITEM_HAS_DUPLICATE_CATEGORIES("The given categories are duplicated");
+    ITEM_HAS_DUPLICATE_CATEGORIES("The given categories are duplicated"),
+    ITEMS_NOT_FOUND("No items found"),
+    PAGE_EXCEED_PAGES("The given page does not exists");
 
     private String message;
 

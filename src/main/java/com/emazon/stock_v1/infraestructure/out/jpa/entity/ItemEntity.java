@@ -25,7 +25,7 @@ public class ItemEntity {
     private String description;
     private Long quantity;
     private BigDecimal price;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "brand_id")
     private BrandEntity brand;
     @ManyToMany

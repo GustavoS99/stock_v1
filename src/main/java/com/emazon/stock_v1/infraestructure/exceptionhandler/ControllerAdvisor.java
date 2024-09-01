@@ -49,23 +49,6 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_PAGINATION_PARAMETER.getMessage()));
     }
 
-    @ExceptionHandler(InvalidLengthCategoryNameException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidLengthCategoryNameException(
-            InvalidLengthCategoryNameException invalidLengthCategoryNameException
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_LENGTH_NAME.getMessage()));
-    }
-
-    @ExceptionHandler(InvalidLengthCategoryDescriptionException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidLengthCategoryDescriptionException(
-            InvalidLengthCategoryDescriptionException invalidLengthCategoryDescriptionException
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(
-                        MESSAGE, ExceptionResponse.INVALID_LENGTH_CATEGORY_DESCRIPTION.getMessage()));
-    }
-
     @ExceptionHandler(EmptyCategoryNameException.class)
     public ResponseEntity<Map<String, String>> handleEmptyCategoryNameException(
             EmptyCategoryNameException emptyCategoryNameException
@@ -88,31 +71,6 @@ public class ControllerAdvisor {
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_NAME.getMessage()));
-    }
-
-    @ExceptionHandler(EmptyBrandDescriptionException.class)
-    public ResponseEntity<Map<String, String>> handleEmptyBrandDescriptionException(
-            EmptyBrandDescriptionException emptyBrandDescriptionException
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_DESCRIPTION.getMessage()));
-    }
-
-    @ExceptionHandler(InvalidLengthBrandNameException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidLengthBrandNameException(
-            InvalidLengthBrandNameException invalidLengthBrandNameException
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_LENGTH_NAME.getMessage()));
-    }
-
-    @ExceptionHandler(InvalidLengthBrandDescriptionException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidLengthBrandDescriptionException(
-            InvalidLengthBrandDescriptionException invalidLengthBrandDescriptionException
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(
-                        MESSAGE, ExceptionResponse.INVALID_LENGTH_BRAND_DESCRIPTION.getMessage()));
     }
 
     @ExceptionHandler(BrandAlreadyExistsException.class)
@@ -147,14 +105,6 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_LENGTH_NAME.getMessage()));
     }
 
-    @ExceptionHandler(InvalidLengthItemDescriptionException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidLengthItemDescriptionException(
-            InvalidLengthItemDescriptionException invalidLengthItemDescriptionException
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_LENGTH_ITEM_DESCRIPTION.getMessage()));
-    }
-
     @ExceptionHandler(BrandNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleBrandNotFoundException(
             BrandNotFoundException brandNotFoundException
@@ -179,9 +129,9 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_BRAND_OF_ITEM.getMessage()));
     }
 
-    @ExceptionHandler(InvalidNumOfCategories.class)
+    @ExceptionHandler(InvalidNumOfCategoriesException.class)
     public ResponseEntity<Map<String, String>> handleInvalidNumOfCategories(
-            InvalidNumOfCategories invalidNumOfCategories
+            InvalidNumOfCategoriesException invalidNumOfCategoriesException
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_NUM_OF_CATEGORIES.getMessage()));
@@ -209,5 +159,21 @@ public class ControllerAdvisor {
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_DESCRIPTION.getMessage()));
+    }
+
+    @ExceptionHandler(ItemsNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleItemsNotFoundException(
+            ItemsNotFoundException itemsNotFoundException
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.ITEMS_NOT_FOUND.getMessage()));
+    }
+
+    @ExceptionHandler(PageExceedTotalPagesException.class)
+    public ResponseEntity<Map<String, String>> handlePageExceedTotalPagesException(
+            PageExceedTotalPagesException pageExceedTotalPagesException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.PAGE_EXCEED_PAGES.getMessage()));
     }
 }

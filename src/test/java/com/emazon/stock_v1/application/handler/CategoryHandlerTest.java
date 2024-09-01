@@ -4,18 +4,16 @@ import com.emazon.stock_v1.application.dto.CategoryRequest;
 import com.emazon.stock_v1.application.dto.CategoryResponse;
 import com.emazon.stock_v1.application.mapper.CategoryRequestMapper;
 import com.emazon.stock_v1.application.mapper.CategoryResponseMapper;
-import com.emazon.stock_v1.domain.api.IFindAllCategoriesServicePort;
-import com.emazon.stock_v1.domain.api.ISaveCategoryServicePort;
+import com.emazon.stock_v1.domain.api.ICategoryServicePort;
 import com.emazon.stock_v1.domain.model.Category;
+import com.emazon.stock_v1.domain.model.PaginatedResult;
+import com.emazon.stock_v1.domain.model.PaginationRequest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +25,7 @@ import static org.mockito.Mockito.*;
 class CategoryHandlerTest {
 
     @Mock
-    private ISaveCategoryServicePort saveCategoryServicePort;
-
-    @Mock
-    private IFindAllCategoriesServicePort findAllCategoriesServicePort;
+    private ICategoryServicePort categoryServicePort;
 
     @Mock
     private CategoryRequestMapper categoryRequestMapper;
@@ -47,45 +42,47 @@ class CategoryHandlerTest {
 
     @BeforeEach
     public void setUp() {
-        categoryRequest = new CategoryRequest("Electrónica", "Artículos Electrónicos");
-        categoryResponse = new CategoryResponse("Electrónica", "Artículos Electrónicos");
         category = new Category(1L, "Electrónica", "Artículos Electrónicos");
+        categoryRequest = new CategoryRequest(category.getName(), category.getDescription());
+        categoryResponse = new CategoryResponse(category.getId(), category.getName(), category.getDescription());
     }
 
     @Test
-    @DisplayName("Should assert Category saved fields and verify the call to saveCategoryServicePort.save()")
-    void saveTest() {
+    void when_saveCategory_expect_callToServicePort() {
+
         when(categoryRequestMapper.categoryRequestToCategory(any(CategoryRequest.class))).thenReturn(category);
-        doNothing().when(saveCategoryServicePort).save(any(Category.class));
+
+        doNothing().when(categoryServicePort).save(any(Category.class));
 
         categoryHandler.save(categoryRequest);
 
-        verify(saveCategoryServicePort, times(1)).save(category);
+        verify(categoryServicePort, times(1)).save(category);
     }
 
     @Test
-    @DisplayName(
-            "Should assert the result list of categories and verify the call to findAllCategoriesServicePort.findAll()"
-    )
-    void findAllTest(){
+    void when_findAllCategories_expect_callToServicePort() {
         int page = 0, size = 10;
         String sort = "desc";
-        List<Category> categoriesList = new ArrayList<>();
-        categoriesList.add(category);
+        List<Category> categoryList = new ArrayList<>();
+        categoryList.add(category);
 
-        Page<Category> categories = new PageImpl<>(categoriesList);
+        PaginatedResult<Category> categories = new PaginatedResult<>(categoryList, page, size, categoryList.size());
 
         List<CategoryResponse> expectedCategoriesList = new ArrayList<>();
-        expectedCategoriesList.add(new CategoryResponse("Electrónica", "Artículos Electrónicos"));
+        expectedCategoriesList.add(categoryResponse);
 
-        when(findAllCategoriesServicePort.findAll(anyInt(), anyInt(), anyString())).thenReturn(categories);
+        PaginatedResult<CategoryResponse> categoryResponses =
+                new PaginatedResult<>(expectedCategoriesList, page, size, categoryList.size());
 
-        when(categoryResponseMapper.categoryToCategoryResponse(any(Category.class))).thenReturn(categoryResponse);
+        when(categoryServicePort.findAll(any(PaginationRequest.class), anyString())).thenReturn(categories);
 
-        Page<CategoryResponse> result = categoryHandler.findAll(page, size, sort);
+        when(categoryResponseMapper.categoriesToCategoryResponsePage(any())).thenReturn(categoryResponses);
 
-        assertEquals(expectedCategoriesList.get(0).getName(), result.getContent().get(0).getName());
-        assertEquals(expectedCategoriesList.get(0).getDescription(), result.getContent().get(0).getDescription());
-        verify(findAllCategoriesServicePort, times(1)).findAll(anyInt(), anyInt(), anyString());
+        PaginatedResult<CategoryResponse> result = categoryHandler.findAll(page, size, sort);
+
+        assertEquals(expectedCategoriesList.get(0).getName(), result.getItems().get(0).getName());
+        assertEquals(expectedCategoriesList.get(0).getDescription(), result.getItems().get(0).getDescription());
+        verify(categoryServicePort, times(1)).findAll(
+                any(PaginationRequest.class), anyString());
     }
 }
