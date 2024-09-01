@@ -105,14 +105,6 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_LENGTH_NAME.getMessage()));
     }
 
-    @ExceptionHandler(InvalidLengthItemDescriptionException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidLengthItemDescriptionException(
-            InvalidLengthItemDescriptionException invalidLengthItemDescriptionException
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_LENGTH_ITEM_DESCRIPTION.getMessage()));
-    }
-
     @ExceptionHandler(BrandNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleBrandNotFoundException(
             BrandNotFoundException brandNotFoundException
@@ -167,5 +159,21 @@ public class ControllerAdvisor {
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.EMPTY_DESCRIPTION.getMessage()));
+    }
+
+    @ExceptionHandler(ItemsNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleItemsNotFoundException(
+            ItemsNotFoundException itemsNotFoundException
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.ITEMS_NOT_FOUND.getMessage()));
+    }
+
+    @ExceptionHandler(PageExceedTotalPagesException.class)
+    public ResponseEntity<Map<String, String>> handlePageExceedTotalPagesException(
+            PageExceedTotalPagesException pageExceedTotalPagesException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.PAGE_EXCEED_PAGES.getMessage()));
     }
 }

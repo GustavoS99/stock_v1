@@ -36,7 +36,7 @@ public class ItemRequest {
     private long quantity;
     private BigDecimal price;
     @NotNull(message = GlobalConstants.EMPTY_BRAND_OF_ITEM_MESSAGE)
-    private BrandRequest brandRequest;
+    private BrandRequest brand;
     @NotNull(message = GlobalConstants.EMPTY_CATEGORIES_OF_ITEM_MESSAGE)
-    private Set<CategoryRequest> categoryRequests;
+    private Set<CategoryRequest> categories;
 }

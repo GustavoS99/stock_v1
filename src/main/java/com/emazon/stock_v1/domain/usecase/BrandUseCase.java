@@ -6,6 +6,8 @@ import com.emazon.stock_v1.domain.model.Brand;
 import com.emazon.stock_v1.domain.model.PaginatedResult;
 import com.emazon.stock_v1.domain.model.PaginationRequest;
 import com.emazon.stock_v1.domain.spi.IBrandPersistencePort;
+import com.emazon.stock_v1.domain.exception.BrandAlreadyExistsException;
+import com.emazon.stock_v1.domain.exception.BrandsNotFoundException;
 import com.emazon.stock_v1.utils.GlobalConstants;
 
 import java.util.List;
@@ -23,7 +25,15 @@ public class BrandUseCase implements IBrandServicePort {
 
         validateDescriptionInput(brand);
 
+        validateIfBrandExists(brand.getName());
+
         brandPersistencePort.save(brand);
+    }
+
+    private void validateIfBrandExists(String name) {
+        if (brandPersistencePort.findByName(name).isPresent()) {
+            throw new BrandAlreadyExistsException();
+        }
     }
 
     private void validateDescriptionInput(Brand brand) {
@@ -53,13 +63,29 @@ public class BrandUseCase implements IBrandServicePort {
             throw new InvalidPaginationParametersException();
         }
 
-        List<Brand> brands = brandPersistencePort.findAll(sortDirection);
-
-        List<Brand> paginatedBrands = getPaginated(brands, paginationRequest.getPage(), paginationRequest.getSize());
+        List<Brand> brands = validateIfListIsEmpty(brandPersistencePort.findAll(sortDirection));
 
         int totalPages = (int) Math.ceil((double) brands.size() / paginationRequest.getSize());
 
+        List<Brand> paginatedBrands = getPaginated(
+                brands, validatePage(paginationRequest.getPage(), totalPages), paginationRequest.getSize());
+
         return new PaginatedResult<>(paginatedBrands, paginationRequest.getPage(), totalPages, brands.size());
+    }
+
+    private List<Brand> validateIfListIsEmpty(List<Brand> all) {
+        if(all.isEmpty())
+            throw new BrandsNotFoundException();
+
+        return all;
+    }
+
+    private int validatePage(int page, int totalPages) {
+
+        if(page >= totalPages)
+            throw new PageExceedTotalPagesException();
+
+        return page;
     }
 
     private List<Brand> getPaginated(List<Brand> brands, int page, int size) {

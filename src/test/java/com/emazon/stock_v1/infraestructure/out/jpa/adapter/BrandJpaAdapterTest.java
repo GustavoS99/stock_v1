@@ -1,8 +1,6 @@
 package com.emazon.stock_v1.infraestructure.out.jpa.adapter;
 
 import com.emazon.stock_v1.domain.model.Brand;
-import com.emazon.stock_v1.infraestructure.exception.BrandAlreadyExistsException;
-import com.emazon.stock_v1.infraestructure.exception.BrandsNotFoundException;
 import com.emazon.stock_v1.infraestructure.out.jpa.entity.BrandEntity;
 import com.emazon.stock_v1.infraestructure.out.jpa.mapper.BrandEntityMapper;
 import com.emazon.stock_v1.infraestructure.out.jpa.repository.IBrandRepository;
@@ -18,11 +16,9 @@ import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,14 +57,6 @@ class BrandJpaAdapterTest {
         assertEquals(brand.getDescription(), savedBrand.getDescription());
     }
 
-    @Test
-    void save_shouldThrowBrandAlreadyExistsException_whenBrandExists() {
-
-        when(brandRepository.findByName(anyString())).thenReturn(Optional.of(brandEntity));
-
-        assertThrows(BrandAlreadyExistsException.class, () -> brandJpaAdapter.save(brand));
-    }
-
     @ParameterizedTest
     @CsvSource(value = {
             "null",
@@ -102,29 +90,5 @@ class BrandJpaAdapterTest {
             verify(brandRepository, times(1)).findAll(any(Sort.class));
         }
 
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {
-            "null",
-            "''",
-            "desc",
-            "asc"
-    }, nullValues = {"null"})
-    void findAll_shouldThrowBrandsNotFoundException_whenBrandsNotFound(String sortDirection) {
-
-        List<BrandEntity> brandEntities = new ArrayList<>();
-
-        List<Brand> brands = new ArrayList<>();
-
-        if(sortDirection == null || sortDirection.isEmpty()) {
-            when(brandRepository.findAll()).thenReturn(brandEntities);
-        } else {
-            when(brandRepository.findAll(any(Sort.class))).thenReturn(brandEntities);
-        }
-
-        when(brandEntityMapper.brandEntitiesToBrands(anyList())).thenReturn(brands);
-
-        assertThrows(BrandsNotFoundException.class, () -> brandJpaAdapter.findAll(sortDirection));
     }
 }
