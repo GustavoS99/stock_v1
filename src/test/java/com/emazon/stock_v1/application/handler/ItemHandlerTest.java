@@ -1,13 +1,10 @@
 package com.emazon.stock_v1.application.handler;
 
-import com.emazon.stock_v1.application.dto.BrandRequest;
-import com.emazon.stock_v1.application.dto.CategoryRequest;
-import com.emazon.stock_v1.application.dto.ItemRequest;
+import com.emazon.stock_v1.application.dto.*;
 import com.emazon.stock_v1.application.mapper.ItemRequestMapper;
+import com.emazon.stock_v1.application.mapper.ItemResponseMapper;
 import com.emazon.stock_v1.domain.api.IItemServicePort;
-import com.emazon.stock_v1.domain.model.Brand;
-import com.emazon.stock_v1.domain.model.Category;
-import com.emazon.stock_v1.domain.model.Item;
+import com.emazon.stock_v1.domain.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -30,11 +29,15 @@ class ItemHandlerTest {
     @Mock
     private ItemRequestMapper itemRequestMapper;
 
+    @Mock
+    private ItemResponseMapper itemResponseMapper;
+
     @InjectMocks
     private ItemHandler itemHandler;
 
     private Item item;
     private ItemRequest itemRequest;
+    private ItemResponse itemResponse;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +50,11 @@ class ItemHandlerTest {
                 item.getName(), item.getDescription(), item.getQuantity(), item.getPrice(),
                 new BrandRequest(item.getBrand().getName(), item.getBrand().getDescription()),
                 Collections.singleton(new CategoryRequest("Electrónica","Dispositivos tecnológicos")));
+
+        itemResponse = new ItemResponse(item.getName(), item.getDescription(), item.getQuantity(), item.getPrice(),
+                new BrandResponse(item.getBrand().getName(), item.getBrand().getDescription()),
+                Collections.singleton(
+                        new CategoryResponse(1L, "Electrónica","Dispositivos tecnológicos")));
     }
 
     @Test
@@ -59,5 +67,36 @@ class ItemHandlerTest {
         itemHandler.save(itemRequest);
 
         verify(itemServicePort, times(1)).save(item);
+    }
+
+    @Test
+    void when_findAllItems_expect_callToServicePort() {
+
+        int page = 0, size = 10;
+        String sortProperty = "", sortDirection = "asc";
+
+        List<Item> itemList = Collections.singletonList(item);
+
+        PaginatedResult<Item> items = new PaginatedResult<>(itemList, page, size, itemList.size());
+
+        List<ItemResponse> expectedItems = Collections.singletonList(itemResponse);
+
+        PaginatedResult<ItemResponse> itemResponses = new PaginatedResult<>(
+                expectedItems, page, size, expectedItems.size()
+        );
+
+        when(itemServicePort.findAll(any(PaginationRequest.class), anyString(), anyString())).thenReturn(items);
+
+        when(itemResponseMapper.itemsToItemResponses(any())).thenReturn(itemResponses);
+
+        PaginatedResult<ItemResponse> result = itemHandler.findAll(page, size, sortProperty, sortDirection);
+
+        assertEquals(expectedItems.get(0).getName(), result.getItems().get(0).getName());
+        assertEquals(expectedItems.get(0).getDescription(), result.getItems().get(0).getDescription());
+        assertEquals(expectedItems.get(0).getQuantity(), result.getItems().get(0).getQuantity());
+        assertEquals(expectedItems.get(0).getPrice(), result.getItems().get(0).getPrice());
+        assertEquals(expectedItems.get(0).getBrand().getName(), result.getItems().get(0).getBrand().getName());
+        verify(itemServicePort, times(1)).findAll(
+                any(PaginationRequest.class), anyString(), anyString());
     }
 }
