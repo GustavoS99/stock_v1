@@ -18,5 +18,5 @@ public class ItemResponse {
     private long quantity;
     private BigDecimal price;
     private BrandResponse brand;
-    private Set<CategoryResponse> categories;
+    private Set<CategoryItemResponse> categories;
 }
