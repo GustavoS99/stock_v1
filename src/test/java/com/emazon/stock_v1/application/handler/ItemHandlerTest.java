@@ -54,7 +54,7 @@ class ItemHandlerTest {
         itemResponse = new ItemResponse(item.getName(), item.getDescription(), item.getQuantity(), item.getPrice(),
                 new BrandResponse(item.getBrand().getName(), item.getBrand().getDescription()),
                 Collections.singleton(
-                        new CategoryResponse(1L, "Electrónica","Dispositivos tecnológicos")));
+                        new CategoryItemResponse(1L, "Electrónica")));
     }
 
     @Test
