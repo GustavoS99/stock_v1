@@ -221,4 +221,9 @@ public class ItemUseCase implements IItemServicePort {
 
         return items.subList(start, end);
     }
+
+    @Override
+    public Item findByName(String name) {
+        return itemPersistencePort.findByName(name).orElseThrow(ItemNotFoundException::new);
+    }
 }

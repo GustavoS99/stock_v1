@@ -16,4 +16,6 @@ public interface IItemServicePort {
 
     PaginatedResult<Item> findByBrandName(
             String brandName, PaginationRequest paginationRequest, String sortBy, String sortDirection);
+
+    Item findByName(String name);
 }
