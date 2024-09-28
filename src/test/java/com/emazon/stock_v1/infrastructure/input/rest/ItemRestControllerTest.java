@@ -8,6 +8,7 @@ import com.emazon.stock_v1.infrastructure.out.jpa.entity.ItemEntity;
 import com.emazon.stock_v1.infrastructure.out.jpa.repository.IBrandRepository;
 import com.emazon.stock_v1.infrastructure.out.jpa.repository.ICategoryRepository;
 import com.emazon.stock_v1.infrastructure.out.jpa.repository.IItemRepository;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,18 +29,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static com.emazon.stock_v1.infrastructure.input.rest.util.PathDefinition.ITEMS;
+import static com.emazon.stock_v1.infrastructure.input.rest.util.PathDefinition.ITEMS_INCREASE_QUANTITY;
 import static com.emazon.stock_v1.utils.GlobalConstants.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -47,9 +45,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class ItemRestControllerTest {
 
-    private static final String ADMIN_USERNAME = "1,gustavo.salazar.co@gmail.com";
-    private static final String WORKER_USERNAME = "2,ronaldo@email.com";
-    private static final String CUSTOMER_USERNAME = "3,messi@email.com";
+    private static final String ADMIN_USERNAME = "1";
+    private static final String WORKER_USERNAME = "2";
+    private static final String CUSTOMER_USERNAME = "3";
 
     @SpyBean
     private IItemHandler itemHandler;
@@ -495,5 +493,62 @@ class ItemRestControllerTest {
 
         mockMvc.perform(get("/items/?page=8"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = WORKER_USERNAME, roles = WAREHOUSE_WORKER)
+    void when_updateItemQuantity_expect_statusNoContent() throws Exception {
+        String updateQuantityJson = """
+                {
+                    "id" : 1,
+                    "quantity" : 30
+                }
+                """;
+
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(itemEntity));
+
+        doNothing().when(itemRepository).updateQuantity(anyLong(), anyLong());
+
+        mockMvc.perform(patch(ITEMS.concat(ITEMS_INCREASE_QUANTITY))
+                        .contentType("application/json")
+                        .content(updateQuantityJson))
+                .andExpect(status().isNoContent());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            ",",
+            "1,",
+            "-1,",
+            "1,-1"
+    })
+    @WithMockUser(username = WORKER_USERNAME, roles = WAREHOUSE_WORKER)
+    void expect_badRequest_when_inputIsInvalid(Long id, Long quantity) throws Exception {
+
+        Map<String, Long> updateQuantityJson = new HashMap<>();
+
+        updateQuantityJson.put("id", id);
+        updateQuantityJson.put("quantity", quantity);
+
+        mockMvc.perform(patch(ITEMS.concat(ITEMS_INCREASE_QUANTITY))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new JSONObject(updateQuantityJson).toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = WORKER_USERNAME, roles = WAREHOUSE_WORKER)
+    void expect_notFound_when_itemDoesNotExist() throws Exception {
+        Map<String, Long> updateQuantityJson = new HashMap<>();
+
+        updateQuantityJson.put("id", 1L);
+        updateQuantityJson.put("quantity", 30L);
+
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch(ITEMS.concat(ITEMS_INCREASE_QUANTITY))
+                        .contentType("application/json")
+                        .content(new JSONObject(updateQuantityJson).toString()))
+                .andExpect(status().isNotFound());
     }
 }

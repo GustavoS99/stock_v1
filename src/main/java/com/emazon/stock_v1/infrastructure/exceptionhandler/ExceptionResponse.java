@@ -27,7 +27,13 @@ public enum ExceptionResponse {
     ITEMS_NOT_FOUND("No items found"),
     PAGE_EXCEED_PAGES("The given page does not exists"),
     INVALID_TOKEN("Invalid or expired token"),
-    ACCESS_DENIED("Access Denied. You do not have sufficient privileges to access this resource.");
+    ACCESS_DENIED("Access Denied. You do not have sufficient privileges to access this resource."),
+
+    ITEM_NOT_FOUND("Item not found"),
+
+    INVALID_ITEM_ID("The given id is invalid"),
+
+    INVALID_ITEM_QUANTITY("The given quantity is invalid");
 
     private String message;
 

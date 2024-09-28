@@ -1,6 +1,5 @@
 package com.emazon.stock_v1.infrastructure.out.jwt.config;
 
-import com.emazon.stock_v1.infrastructure.input.rest.util.PathDefinition;
 import com.emazon.stock_v1.infrastructure.out.jwt.config.filter.JwtTokenValidator;
 import com.emazon.stock_v1.infrastructure.out.jwt.entry.point.AuthenticationEntryPointImpl;
 import com.emazon.stock_v1.infrastructure.out.jwt.handler.AccessDeniedHandlerImpl;
@@ -17,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.emazon.stock_v1.infrastructure.input.rest.util.PathDefinition.*;
+import static com.emazon.stock_v1.infrastructure.input.rest.util.PathDefinition.BRAND;
 import static com.emazon.stock_v1.utils.GlobalConstants.*;
 
 @Configuration
@@ -55,9 +55,16 @@ public class SecurityConfiguration {
 
                     authorizeRequests.requestMatchers(
                             HttpMethod.GET, ITEMS.concat(CATEGORY_WITH_ID_PARAM)
-                    ).permitAll();
+                    ).hasAnyRole(
+                            ADMIN, WAREHOUSE_WORKER, CUSTOMER
+                    );
 
-                    authorizeRequests.requestMatchers(HttpMethod.GET, ITEMS.concat(PathDefinition.BRAND)).permitAll();
+                    authorizeRequests.requestMatchers(HttpMethod.GET, ITEMS.concat(BRAND)).hasAnyRole(
+                            ADMIN, WAREHOUSE_WORKER, CUSTOMER
+                    );
+
+                    authorizeRequests.requestMatchers(HttpMethod.PATCH, ITEMS.concat(ITEMS_INCREASE_QUANTITY))
+                            .hasRole(WAREHOUSE_WORKER);
 
                     authorizeRequests.requestMatchers(SWAGGER_UI).permitAll();
                     authorizeRequests.requestMatchers(HttpMethod.GET, OPEN_API).permitAll();

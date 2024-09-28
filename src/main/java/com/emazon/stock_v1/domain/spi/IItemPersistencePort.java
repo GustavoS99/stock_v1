@@ -21,4 +21,8 @@ public interface IItemPersistencePort {
     List<Item> findByBrandName(String brandName, String sortBy, String sortDirection);
 
     Optional<Item> findByName(String name);
+
+    void updateQuantity(Long id, Long quantity);
+
+    Optional<Item> findById(Long id);
 }
