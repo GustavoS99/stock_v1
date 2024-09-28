@@ -6,9 +6,13 @@ import com.emazon.stock_v1.domain.model.PaginatedResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.Set;
+
 @Mapper(componentModel = "spring")
 public interface CategoryResponseMapper {
 
     @Mapping(target = "CategoryResponse.id", ignore = true)
     PaginatedResult<CategoryResponse> categoriesToCategoryResponsePage(PaginatedResult<Category> categories);
+
+    Set<CategoryResponse> toCategoryResponseSet(Set<Category> categories);
 }

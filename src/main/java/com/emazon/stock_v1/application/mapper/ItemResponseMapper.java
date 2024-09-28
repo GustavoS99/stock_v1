@@ -5,7 +5,7 @@ import com.emazon.stock_v1.domain.model.Item;
 import com.emazon.stock_v1.domain.model.PaginatedResult;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {BrandResponseMapper.class, CategoryResponseMapper.class})
 public interface ItemResponseMapper {
 
     ItemResponse itemToItemResponse(Item item);

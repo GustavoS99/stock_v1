@@ -4,10 +4,10 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 public class Item {
-    private long id;
+    private Long id;
     private String name;
     private String description;
-    private long quantity;
+    private Long quantity;
     private BigDecimal price;
     private Brand brand;
     private Set<Category> categories;
@@ -15,7 +15,7 @@ public class Item {
     public Item() {
     }
 
-    public Item(long id, String name, String description, long quantity, BigDecimal price, Brand brand, Set<Category> categories) {
+    public Item(Long id, String name, String description, Long quantity, BigDecimal price, Brand brand, Set<Category> categories) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -25,11 +25,11 @@ public class Item {
         this.categories = categories;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -49,11 +49,11 @@ public class Item {
         this.description = description;
     }
 
-    public long getQuantity() {
+    public Long getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(long quantity) {
+    public void setQuantity(Long quantity) {
         this.quantity = quantity;
     }
 

@@ -55,7 +55,7 @@ class ItemUseCaseTest {
 
         category = new Category(1L, "Electrónica","Dispositivos tecnológicos");
 
-        item = new Item(1L, "Portatil XYZ", "Disco duro: xx,  Ram: xx, Procesador: xx", 10,
+        item = new Item(1L, "Portatil XYZ", "Disco duro: xx,  Ram: xx, Procesador: xx", 10L,
                 new BigDecimal(2000000),
                 brand,
                 Collections.singleton(category));
@@ -317,5 +317,38 @@ class ItemUseCaseTest {
 
         assertThrows(ItemsNotFoundException.class, () -> itemUseCase
                 .findAll(paginationRequest, sortProperty, sortDirection));
+    }
+
+    @Test
+    void when_increaseQuantity_expect_callToPersistence() {
+
+        when(itemPersistencePort.findById(anyLong())).thenReturn(Optional.of(item));
+
+        doNothing().when(itemPersistencePort).updateQuantity(anyLong(), anyLong());
+
+        itemUseCase.increaseQuantity(item);
+
+        verify(itemPersistencePort, times(1)).updateQuantity(anyLong(), anyLong());
+    }
+
+    @Test
+    void expect_InvalidItemIdException_when_idInputIsZero() {
+        item.setId(0L);
+
+        assertThrows(InvalidItemIdException.class, () -> itemUseCase.increaseQuantity(item));
+    }
+
+    @Test
+    void expect_InvalidItemQuantityException_when_idInputIsZero() {
+        item.setQuantity(0L);
+
+        assertThrows(InvalidItemQuantityException.class, () -> itemUseCase.increaseQuantity(item));
+    }
+
+    @Test
+    void expect_ItemNotFoundException_when_itemDoesNotExist() {
+        when(itemPersistencePort.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(ItemNotFoundException.class, () -> itemUseCase.increaseQuantity(item));
     }
 }

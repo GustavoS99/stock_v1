@@ -13,6 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Setter
 public class ItemResponse {
+    private Long id;
     private String name;
     private String description;
     private long quantity;
