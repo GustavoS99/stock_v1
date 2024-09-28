@@ -2,8 +2,10 @@ package com.emazon.stock_v1.application.handler;
 
 import com.emazon.stock_v1.application.dto.ItemRequest;
 import com.emazon.stock_v1.application.dto.ItemResponse;
+import com.emazon.stock_v1.application.dto.ItemUpdateQuantityRequest;
 import com.emazon.stock_v1.application.mapper.ItemRequestMapper;
 import com.emazon.stock_v1.application.mapper.ItemResponseMapper;
+import com.emazon.stock_v1.application.mapper.ItemUpdateQuantityRequestMapper;
 import com.emazon.stock_v1.domain.api.IItemServicePort;
 import com.emazon.stock_v1.domain.model.Item;
 import com.emazon.stock_v1.domain.model.PaginatedResult;
@@ -19,6 +21,7 @@ public class ItemHandler implements IItemHandler {
     private final IItemServicePort itemServicePort;
     private final ItemRequestMapper itemRequestMapper;
     private final ItemResponseMapper itemResponseMapper;
+    private final ItemUpdateQuantityRequestMapper itemUpdateQuantityRequestMapper;
 
     @Override
     public void save(ItemRequest itemRequest) {
@@ -48,5 +51,10 @@ public class ItemHandler implements IItemHandler {
         return itemResponseMapper.itemsToItemResponses(
                 itemServicePort.findByBrandName(brandName, new PaginationRequest(page, size), sortBy, sortDirection)
         );
+    }
+
+    @Override
+    public void increaseQuantity(ItemUpdateQuantityRequest itemUpdateQuantityRequest) {
+        itemServicePort.increaseQuantity(itemUpdateQuantityRequestMapper.toItem(itemUpdateQuantityRequest));
     }
 }

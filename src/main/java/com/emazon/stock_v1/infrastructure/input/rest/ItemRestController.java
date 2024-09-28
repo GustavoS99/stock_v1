@@ -3,6 +3,7 @@ package com.emazon.stock_v1.infrastructure.input.rest;
 import com.emazon.stock_v1.application.dto.BrandRequest;
 import com.emazon.stock_v1.application.dto.ItemRequest;
 import com.emazon.stock_v1.application.dto.ItemResponse;
+import com.emazon.stock_v1.application.dto.ItemUpdateQuantityRequest;
 import com.emazon.stock_v1.application.handler.IItemHandler;
 import com.emazon.stock_v1.domain.model.PaginatedResult;
 import com.emazon.stock_v1.utils.GlobalConstants;
@@ -98,5 +99,22 @@ public class ItemRestController {
             @RequestParam(defaultValue = GlobalConstants.ASCENDING_SORT) String sortDirection
     ) {
         return ResponseEntity.ok(itemHandler.findByBrandName(brand.getName(), page, size, sortBy, sortDirection));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Item quantity updated",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Item not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content)
+    })
+    @Operation(summary = "Update item quantity")
+    @PatchMapping(ITEMS_INCREASE_QUANTITY)
+    public ResponseEntity<Void> increaseQuantity(
+            @RequestBody ItemUpdateQuantityRequest itemUpdateQuantityRequest
+    ) {
+        itemHandler.increaseQuantity(itemUpdateQuantityRequest);
+        return ResponseEntity.noContent().build();
     }
 }

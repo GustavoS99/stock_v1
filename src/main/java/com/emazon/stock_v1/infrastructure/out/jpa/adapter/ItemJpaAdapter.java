@@ -96,4 +96,14 @@ public class ItemJpaAdapter implements IItemPersistencePort {
     public Optional<Item> findByName(String name) {
         return itemRepository.findByName(name).map(itemEntityMapper::itemEntityToItem);
     }
+
+    @Override
+    public void updateQuantity(Long id, Long quantity) {
+        itemRepository.updateQuantity(id, quantity);
+    }
+
+    @Override
+    public Optional<Item> findById(Long id) {
+        return itemRepository.findById(id).map(itemEntityMapper::itemEntityToItem);
+    }
 }

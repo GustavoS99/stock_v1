@@ -79,6 +79,8 @@ public class GlobalConstants {
     public static final String CUSTOMER = "CUSTOMER";
 
     public static final String BEARER = "Bearer ";
+    public static final int MIN_ID = 1;
+    public static final int MIN_QUANTITY = 1;
 
     private GlobalConstants() {
         throw new IllegalStateException("Utility class");

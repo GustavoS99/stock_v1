@@ -2,6 +2,7 @@ package com.emazon.stock_v1.application.handler;
 
 import com.emazon.stock_v1.application.dto.ItemRequest;
 import com.emazon.stock_v1.application.dto.ItemResponse;
+import com.emazon.stock_v1.application.dto.ItemUpdateQuantityRequest;
 import com.emazon.stock_v1.domain.model.PaginatedResult;
 
 public interface IItemHandler {
@@ -15,4 +16,6 @@ public interface IItemHandler {
 
     PaginatedResult<ItemResponse> findByBrandName(
             String brandName, int page, int size, String sortBy, String sortDirection);
+
+    void increaseQuantity(ItemUpdateQuantityRequest itemUpdateQuantityRequest);
 }

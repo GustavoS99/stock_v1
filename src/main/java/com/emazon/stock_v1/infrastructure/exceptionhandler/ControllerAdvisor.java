@@ -176,4 +176,28 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.PAGE_EXCEED_PAGES.getMessage()));
     }
+
+    @ExceptionHandler(ItemNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleItemNotFoundException(
+            ItemNotFoundException itemNotFoundException
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.ITEM_NOT_FOUND.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidItemIdException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidItemIdException(
+            InvalidItemIdException invalidItemIdException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_ITEM_ID.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidItemQuantityException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidItemQuantityException(
+            InvalidItemQuantityException invalidItemQuantityException
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_ITEM_QUANTITY.getMessage()));
+    }
 }

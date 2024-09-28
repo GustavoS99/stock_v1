@@ -63,7 +63,7 @@ class ItemJpaAdapterTest {
         Category category = new Category(1L, "Electrónica", "Dispositivos tecnológicos");
 
         item = new Item(1L, "Portatil XYZ", "Disco duro: xx,  Ram: xx, Procesador: xx",
-                10, new BigDecimal(2000000),
+                10L, new BigDecimal(2000000),
                 brand,
                 Collections.singleton(category));
 
@@ -197,5 +197,15 @@ class ItemJpaAdapterTest {
         assertEquals(items, result);
 
         verify(itemRepository, times(1)).findByBrandName(anyString(), any(Sort.class));
+    }
+
+    @Test
+    void when_updateQuantity_expect_callToRepository() {
+
+        doNothing().when(itemRepository).updateQuantity(anyLong(), anyLong());
+
+        itemJpaAdapter.updateQuantity(item.getId(), item.getQuantity());
+
+        verify(itemRepository, times(1)).updateQuantity(anyLong(), anyLong());
     }
 }

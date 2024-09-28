@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.emazon.stock_v1.utils.GlobalConstants.MIN_ID;
+import static com.emazon.stock_v1.utils.GlobalConstants.MIN_QUANTITY;
 import static com.emazon.stock_v1.utils.Helpers.isOrdered;
 
 public class ItemUseCase implements IItemServicePort {
@@ -223,7 +225,25 @@ public class ItemUseCase implements IItemServicePort {
     }
 
     @Override
-    public Item findByName(String name) {
-        return itemPersistencePort.findByName(name).orElseThrow(ItemNotFoundException::new);
+    public void increaseQuantity(Item item) {
+        validateIncreaseQuantityInput(item);
+
+        var storedItem = itemPersistencePort.findById(item.getId()).orElseThrow(ItemNotFoundException::new);
+
+        Long newQuantity = item.getQuantity() + storedItem.getQuantity();
+        item.setQuantity(newQuantity);
+
+        itemPersistencePort.updateQuantity(item.getId(), item.getQuantity());
+    }
+
+    private void validateIncreaseQuantityInput(Item item) {
+        if(item.getId() == null || item.getId() < MIN_ID)
+            throw new InvalidItemIdException();
+
+        if(item.getQuantity() == null || item.getQuantity() < MIN_QUANTITY)
+            throw new InvalidItemQuantityException();
+
+        if(itemPersistencePort.findById(item.getId()).isEmpty())
+            throw new ItemNotFoundException();
     }
 }

@@ -14,6 +14,10 @@ public class PathDefinition {
 
     public static final String BRAND = "/brand/";
 
+    public static final String ITEMS_INCREASE_QUANTITY = "/increase-quantity/";
+
+    public static final String SEARCH = "/search/";
+
     public static final String SWAGGER_UI = "/swagger-ui/**";
     public static final String OPEN_API = "/v3/api-docs/**";
 }
